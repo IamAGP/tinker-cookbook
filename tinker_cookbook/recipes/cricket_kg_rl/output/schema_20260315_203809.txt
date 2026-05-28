@@ -1,0 +1,237 @@
+schema exploration — 2026-03-15T20:38:09.816270
+output file: /Users/adithyagiridharan/Desktop/PythonProjects/tinker-cookbook/tinker_cookbook/recipes/cricket_kg_rl/output/schema_20260315_203809.txt
+
+============================================================
+NODE LABELS & PROPERTIES
+============================================================
+  :`BattingPerformance`
+      .performanceId
+      .runsScored
+      .ballsFaced
+      .fours
+      .strikeRate
+      .isOut
+      .sixes
+  :`BowlingPerformance`
+      .performanceId
+      .economy
+      .wicketsTaken
+      .dotBalls
+      .oversBowled
+      .runsConceded
+  :`Delivery`
+      .deliveryId
+      .isWicket
+      .batterRuns
+      .ballNumber
+      .extraRuns
+      .totalRuns
+      .extraType
+      .wides
+      .noballs
+      .byes
+      .legbyes
+  :`Innings`
+      .inningsId
+      .inningsNumber
+      .targetRuns
+      .targetOvers
+  :`Match`
+      .matchId
+      .date
+      .season
+      .city
+      .venue
+      .matchType
+      .gender
+      .matchNumber
+      .overs
+      .ballsPerOver
+  :`Official`
+      .name
+      .officialId
+  :`Over`
+      .overId
+      .overNumber
+      .runsScored
+      .wickets
+  :`Player`
+      .name
+      .playerId
+  :`Team`
+      .name
+      .teamType
+  :`Tournament`
+      .name
+      .season
+  :`Venue`
+      .name
+      .city
+  :`Wicket`
+      .wicketId
+      .dismissalKind
+
+============================================================
+RELATIONSHIP TYPES & PROPERTIES
+============================================================
+  :`BATTED_IN`
+  :`BATTING_PERFORMANCE`
+  :`BOWLED_OVER`
+  :`BOWLED`
+  :`BOWLER_TOOK_WICKET`
+  :`BOWLING_IN_INNINGS`
+  :`BOWLING_PERFORMANCE`
+  :`DISMISSED`
+  :`FACED`
+  :`FIELDER_INVOLVED`
+      .role
+  :`HAS_DELIVERY`
+  :`HAS_INNINGS`
+  :`HAS_OVER`
+  :`NON_STRIKER`
+  :`OFFICIATED`
+      .role
+  :`PARTICIPATED_IN`
+  :`PART_OF_TOURNAMENT`
+  :`PERFORMANCE_IN_INNINGS`
+  :`PLAYED_AT`
+  :`PLAYER_OF_MATCH`
+  :`RESULTED_IN_WICKET`
+  :`SQUAD_MEMBER`
+      .matchId
+      .season
+  :`WON_MATCH`
+      .margin
+      .marginType
+  :`WON_TOSS`
+      .decision
+
+============================================================
+NODE COUNTS PER LABEL
+============================================================
+  Delivery: 81,373
+  Over: 13,178
+  BattingPerformance: 5,143
+  Wicket: 4,026
+  BowlingPerformance: 3,996
+  Innings: 698
+  Match: 340
+  Player: 333
+  Official: 49
+  Venue: 28
+  Team: 14
+  Tournament: 1
+
+============================================================
+RELATIONSHIP COUNTS PER TYPE
+============================================================
+  HAS_DELIVERY: 81,373
+  FACED: 81,373
+  BOWLED: 81,373
+  NON_STRIKER: 81,373
+  HAS_OVER: 13,178
+  BOWLED_OVER: 13,178
+  SQUAD_MEMBER: 7,480
+  BATTING_PERFORMANCE: 5,143
+  PERFORMANCE_IN_INNINGS: 5,143
+  RESULTED_IN_WICKET: 4,026
+  DISMISSED: 4,026
+  BOWLER_TOOK_WICKET: 4,026
+  BOWLING_PERFORMANCE: 3,996
+  BOWLING_IN_INNINGS: 3,996
+  FIELDER_INVOLVED: 2,857
+  OFFICIATED: 1,698
+  HAS_INNINGS: 698
+  BATTED_IN: 698
+  PARTICIPATED_IN: 680
+  PART_OF_TOURNAMENT: 340
+  PLAYED_AT: 340
+  WON_TOSS: 340
+  PLAYER_OF_MATCH: 339
+  WON_MATCH: 331
+
+============================================================
+SAMPLE NODE (1 per label)
+============================================================
+
+  [BattingPerformance]
+      strikeRate: 155.56
+      ballsFaced: 9
+      performanceId: 1082591_1_dcce6f09_bat
+      sixes: 1
+      runsScored: 14
+      isOut: True
+      fours: 2
+
+  [BowlingPerformance]
+      runsConceded: 32
+      dotBalls: 10
+      performanceId: 1082591_1_245c97cb_bowl
+      oversBowled: 4.0
+      wicketsTaken: 1
+      economy: 8.0
+
+  [Delivery]
+      isWicket: False
+      ballNumber: 1
+      deliveryId: 1082591_1_0_1
+      legbyes: 0
+      batterRuns: 0
+      noballs: 0
+      totalRuns: 0
+      byes: 0
+      extraType: 
+      extraRuns: 0
+      wides: 0
+
+  [Innings]
+      inningsNumber: 1
+      targetOvers: 0
+      targetRuns: 0
+      inningsId: 1082591_1
+
+  [Match]
+      date: 2017-04-05
+      venue: Rajiv Gandhi International Stadium, Uppal
+      gender: male
+      city: Hyderabad
+      matchType: T20
+      season: 2017
+      overs: 20
+      matchId: 1082591
+      matchNumber: 1
+      ballsPerOver: 6
+
+  [Official]
+      officialId: bad31fac
+      name: J Srinath
+
+  [Over]
+      overNumber: 0
+      overId: 1082591_1_0
+      runsScored: 7
+      wickets: 0
+
+  [Player]
+      name: CH Gayle
+      playerId: db584dad
+
+  [Team]
+      name: Sunrisers Hyderabad
+      teamType: club
+
+  [Tournament]
+      name: Indian Premier League
+      season: 2022
+
+  [Venue]
+      city: Hyderabad
+      name: Rajiv Gandhi International Stadium, Uppal
+
+  [Wicket]
+      dismissalKind: caught
+      wicketId: 1082591_1_1_5_wicket
+
+============================================================
+Done.
+============================================================

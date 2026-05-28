@@ -1,0 +1,249 @@
+Logging to: 
+/Users/adithyagiridharan/Desktop/PythonProjects/tinker-cookbook/tinker_cookbook/recipes/cricket
+_kg_rl/output/smoke_20260317_200145.log
+Latest log: 
+/Users/adithyagiridharan/Desktop/PythonProjects/tinker-cookbook/tinker_cookbook/recipes/cricket
+_kg_rl/output/smoke_latest.log
+Connecting to Tinker...
+Mode: CHECKPOINT — tinker://e6c3eb80-28f6-56d5-88dd-3f35f6dea45a:train:0/sampler_weights/000030
+Sampling client ready: SamplingClient
+
+╭────────────────────────────── Cricket KG Inference Smoke Test ──────────────────────────────╮
+│ Model: Qwen/Qwen3-30B-A3B                                                                   │
+│ Renderer: qwen3_disable_thinking (thinking OFF)                                             │
+│ Question: How many total wickets did Rashid Khan take across all IPL seasons in this        │
+│ dataset?                                                                                    │
+╰─────────────────────────────────────────────────────────────────────────────────────────────╯
+NEO4J_URI: neo4j+s://cfadfcf5.databases.neo4j.io
+Creating Neo4j async driver...
+Neo4j driver created.
+Creating TinkerTokenCompleter (max_tokens=2048)...
+Policy ready.
+Loading tokenizer for Qwen/Qwen3-30B-A3B...
+Tokenizer loaded. Vocab size: 151643
+Building renderer 'qwen3_disable_thinking'...
+Renderer ready: Qwen3DisableThinkingRenderer
+Instantiating Neo4jTools (get_schema / run_cypher / final_answer)...
+Tool specs built: [{'name': 'get_schema', 'description': 'Get all node labels, relationship 
+types, and their properties in the cricket KG.', 'parameters': {'properties': {}, 'title': 
+'get_schema_params', 'type': 'object'}}, {'name': 'run_cypher', 'description': 'Execute a 
+Cypher query against the cricket knowledge graph and return the results.', 'parameters': 
+{'properties': {'query': {'description': 'A read-only Cypher query to run against the cricket 
+KG', 'title': 'Query', 'type': 'string'}}, 'required': ['query'], 'title': 'run_cypher_params',
+'type': 'object'}}, {'name': 'final_answer', 'description': 'Submit your final answer. This 
+ends the episode.', 'parameters': {'properties': {'answer': {'description': 'Your final answer 
+to the cricket question', 'title': 'Answer', 'type': 'string'}}, 'required': ['answer'], 
+'title': 'final_answer_params', 'type': 'object'}}]
+Building initial message sequence...
+Initial messages: 2 message(s)
+  [0] role=system  content='You are a cricket data analyst with access to a Neo4j knowledge 
+graph containing ball-by-ball IPL T20 data. Follow these'...
+  [1] role=user  content='How many total wickets did Rashid Khan take across all IPL seasons in
+this dataset?'...
+Building AgentToolEnv...
+Env ready: EnvFromMessageEnv
+
+Running episode (do_single_rollout)...
+
+Rollout complete. Transitions: 3
+
+
+───────────────────────────────────── EPISODE TRANSCRIPT ──────────────────────────────────────
+Total transitions in trajectory: 3
+
+╭───────────────────── Turn 1 — TOOL RESULT (469 tokens, 5 new chunk(s)) ─────────────────────╮
+│ <|im_start|>system                                                                          │
+│ You are a cricket data analyst with access to a Neo4j knowledge graph containing            │
+│ ball-by-ball IPL T20 data. Follow these steps strictly:                                     │
+│ 1. Call get_schema to understand the graph structure before writing any query.              │
+│ 2. Call run_cypher with a valid read-only Cypher query based on what the schema tells you.  │
+│ 3. Once you have a result, you MUST call the final_answer tool to submit your answer. Do    │
+│ NOT write the answer as plain text or XML tags. You MUST use the final_answer tool call —   │
+│ no other format is accepted.                                                                │
+│                                                                                             │
+│ # Tools                                                                                     │
+│                                                                                             │
+│ You may call one or more functions to assist with the user query.                           │
+│                                                                                             │
+│ You are provided with function signatures within <tools></tools> XML tags:                  │
+│ <tools>                                                                                     │
+│ {"type": "function", "function": {"name": "get_schema", "description": "Get all node        │
+│ labels, relationship types, and their properties in the cricket KG.", "parameters":         │
+│ {"properties": {}, "title": "get_schema_params", "type": "object"}}}                        │
+│ {"type": "function", "function": {"name": "run_cypher", "description": "Execute a Cypher    │
+│ query against the cricket knowledge graph and return the results.", "parameters":           │
+│ {"properties": {"query": {"description": "A read-only Cypher query to run against the       │
+│ cricket KG", "title": "Query", "type": "string"}}, "required": ["query"], "title":          │
+│ "run_cypher_params", "type": "object"}}}                                                    │
+│ {"type": "function", "function": {"name": "final_answer", "description": "Submit your final │
+│ answer. This ends the episode.", "parameters": {"properties": {"answer": {"description":    │
+│ "Your final answer to the cricket question", "title": "Answer", "type": "string"}},         │
+│ "required": ["answer"], "title": "final_answer_params", "type": "object"}}}                 │
+│ </tools>                                                                                    │
+│                                                                                             │
+│ For each function call, return a json object with function name and arguments within        │
+│ <tool_call></tool_call> XML tags:                                                           │
+│ <tool_call>                                                                                 │
+│ {"name": <function-name>, "arguments": <args-json-object>}                                  │
+│ </tool_call><|im_end|>                                                                      │
+│ <|im_start|>user                                                                            │
+│ How many total wickets did Rashid Khan take across all IPL seasons in this                  │
+│ dataset?<|im_end|>                                                                          │
+│ <|im_start|>assistant                                                                       │
+│ <think>                                                                                     │
+│                                                                                             │
+│ </think>                                                                                    │
+│                                                                                             │
+│                                                                                             │
+╰─────────────────────────────────────────────────────────────────────────────────────────────╯
+Turn 1: model generating 16 action tokens...
+╭───────────────────────────── Turn 1 — MODEL OUTPUT (16 tokens) ─────────────────────────────╮
+│ <tool_call>                                                                                 │
+│ {"name": "get_schema", "arguments": {}}                                                     │
+│ </tool_call><|im_end|>                                                                      │
+╰─────────────────────────────────────────────────────────────────────────────────────────────╯
+  Observation total: 5 chunk(s) in ModelInput
+  Reward: 0.0
+
+╭──────────────────── Turn 2 — TOOL RESULT (1177 tokens, 4 new chunk(s)) ─────────────────────╮
+│                                                                                             │
+│ <tool_call>                                                                                 │
+│ {"name": "get_schema", "arguments": {}}                                                     │
+│ </tool_call><|im_end|>                                                                      │
+│ <|im_start|>user                                                                            │
+│ <tool_response>                                                                             │
+│ === NODE LABELS AND PROPERTIES ===                                                          │
+│   :`BattingPerformance`  properties: performanceId, runsScored, ballsFaced, fours,          │
+│ strikeRate, isOut, sixes                                                                    │
+│   :`BowlingPerformance`  properties: performanceId, economy, wicketsTaken, dotBalls,        │
+│ oversBowled, runsConceded                                                                   │
+│   :`Delivery`  properties: deliveryId, isWicket, batterRuns, ballNumber, extraRuns,         │
+│ totalRuns, extraType, wides, noballs, byes, legbyes                                         │
+│   :`Innings`  properties: inningsId, inningsNumber, targetRuns, targetOvers                 │
+│   :`Match`  properties: matchId, date, season, city, venue, matchType, gender, matchNumber, │
+│ overs, ballsPerOver                                                                         │
+│   :`Official`  properties: name, officialId                                                 │
+│   :`Over`  properties: overId, overNumber, runsScored, wickets                              │
+│   :`Player`  properties: name, playerId                                                     │
+│   :`Team`  properties: name, teamType                                                       │
+│   :`Tournament`  properties: name, season                                                   │
+│   :`Venue`  properties: name, city                                                          │
+│   :`Wicket`  properties: wicketId, dismissalKind                                            │
+│                                                                                             │
+│ === RELATIONSHIP TYPES (fromLabel)-[:TYPE]->(toLabel) ===                                   │
+│   (:Team)-[:BATTED_IN]->(:Innings)  properties: none                                        │
+│   (:Player)-[:BATTING_PERFORMANCE]->(:BattingPerformance)  properties: none                 │
+│   (:Player)-[:BOWLED]->(:Delivery)  properties: none                                        │
+│   (:Player)-[:BOWLED_OVER]->(:Over)  properties: none                                       │
+│   (:Player)-[:BOWLER_TOOK_WICKET]->(:Wicket)  properties: none                              │
+│   (:BowlingPerformance)-[:BOWLING_IN_INNINGS]->(:Innings)  properties: none                 │
+│   (:Player)-[:BOWLING_PERFORMANCE]->(:BowlingPerformance)  properties: none                 │
+│   (:Player)-[:DISMISSED]->(:Wicket)  properties: none                                       │
+│   (:Player)-[:FACED]->(:Delivery)  properties: none                                         │
+│   (:Player)-[:FIELDER_INVOLVED]->(:Wicket)  properties: none                                │
+│   (:Over)-[:HAS_DELIVERY]->(:Delivery)  properties: none                                    │
+│   (:Match)-[:HAS_INNINGS]->(:Innings)  properties: none                                     │
+│   (:Innings)-[:HAS_OVER]->(:Over)  properties: none                                         │
+│   (:Player)-[:NON_STRIKER]->(:Delivery)  properties: none                                   │
+│   (:Official)-[:OFFICIATED]->(:Match)  properties: none                                     │
+│   (:Team)-[:PARTICIPATED_IN]->(:Match)  properties: none                                    │
+│   (:Match)-[:PART_OF_TOURNAMENT]->(:Tournament)  properties: none                           │
+│   (:BattingPerformance)-[:PERFORMANCE_IN_INNINGS]->(:Innings)  properties: none             │
+│   (:Match)-[:PLAYED_AT]->(:Venue)  properties: none                                         │
+│   (:Player)-[:PLAYER_OF_MATCH]->(:Match)  properties: none                                  │
+│   (:Delivery)-[:RESULTED_IN_WICKET]->(:Wicket)  properties: none                            │
+│   (:Player)-[:SQUAD_MEMBER]->(:Team)  properties: none                                      │
+│   (:Team)-[:WON_MATCH]->(:Match)  properties: none                                          │
+│   (:Team)-[:WON_TOSS]->(:Match)  properties: none                                           │
+│                                                                                             │
+│ === CONSTRAINTS ===                                                                         │
+│   NODE_KEY on NODE BattingPerformance (performanceId)                                       │
+│   NODE_KEY on NODE BowlingPerformance (performanceId)                                       │
+│   NODE_KEY on NODE Delivery (deliveryId)                                                    │
+│   NODE_KEY on NODE Innings (inningsId)                                                      │
+│   NODE_KEY on NODE Match (matchId)                                                          │
+│   NODE_KEY on NODE Official (officialId)                                                    │
+│   NODE_KEY on NODE Over (overId)                                                            │
+│   NODE_KEY on NODE Player (playerId)                                                        │
+│   NODE_KEY on NODE Team (name)                                                              │
+│   NODE_KEY on NODE Tournament (name)                                                        │
+│   NODE_KEY on NODE Venue (name)                                                             │
+│   NODE_KEY on NODE Wicket (wicketId)                                                        │
+│                                                                                             │
+│ === INDEXES ===                                                                             │
+│   RANGE [ONLINE] on NODE BattingPerformance (performanceId)                                 │
+│   RANGE [ONLINE] on NODE BowlingPerformance (performanceId)                                 │
+│   RANGE [ONLINE] on NODE Delivery (deliveryId)                                              │
+│   RANGE [ONLINE] on NODE Delivery (batterRuns)                                              │
+│   RANGE [ONLINE] on NODE Delivery (isWicket)                                                │
+│   RANGE [ONLINE] on NODE Innings (inningsId)                                                │
+│   RANGE [ONLINE] on NODE Innings (inningsNumber)                                            │
+│   RANGE [ONLINE] on NODE Match (matchId)                                                    │
+│   RANGE [ONLINE] on NODE Match (city)                                                       │
+│   RANGE [ONLINE] on NODE Match (date)                                                       │
+│   RANGE [ONLINE] on NODE Match (season)                                                     │
+│   RANGE [ONLINE] on NODE Official (officialId)                                              │
+│   RANGE [ONLINE] on NODE Over (overId)                                                      │
+│   RANGE [ONLINE] on NODE Over (overNumber)                                                  │
+│   RANGE [ONLINE] on NODE Player (playerId)                                                  │
+│   RANGE [ONLINE] on NODE Player (name)                                                      │
+│   RANGE [ONLINE] on NODE Team (name)                                                        │
+│   RANGE [ONLINE] on NODE Tournament (name)                                                  │
+│   RANGE [ONLINE] on NODE Venue (name)                                                       │
+│   RANGE [ONLINE] on NODE Wicket (wicketId)                                                  │
+│ </tool_response><|im_end|>                                                                  │
+│ <|im_start|>assistant                                                                       │
+│ <think>                                                                                     │
+│                                                                                             │
+│ </think>                                                                                    │
+│                                                                                             │
+│                                                                                             │
+╰─────────────────────────────────────────────────────────────────────────────────────────────╯
+Turn 2: model generating 61 action tokens...
+╭───────────────────────────── Turn 2 — MODEL OUTPUT (61 tokens) ─────────────────────────────╮
+│ <tool_call>                                                                                 │
+│ {"name": "run_cypher", "arguments": {"query": "MATCH (p:Player {name: 'Rashid               │
+│ Khan'})-[:BOWLING_PERFORMANCE]->(bp:BowlingPerformance) RETURN SUM(bp.wicketsTaken) AS      │
+│ totalWickets"}}                                                                             │
+│ </tool_call><|im_end|>                                                                      │
+╰─────────────────────────────────────────────────────────────────────────────────────────────╯
+  Observation total: 9 chunk(s) in ModelInput
+  Reward: 0.0
+
+╭───────────────────── Turn 3 — TOOL RESULT (89 tokens, 4 new chunk(s)) ──────────────────────╮
+│                                                                                             │
+│ <tool_call>                                                                                 │
+│ {"name": "run_cypher", "arguments": {"query": "MATCH (p:Player {name: 'Rashid               │
+│ Khan'})-[:BOWLING_PERFORMANCE]->(bp:BowlingPerformance) RETURN SUM(bp.wicketsTaken) AS      │
+│ totalWickets"}}                                                                             │
+│ </tool_call><|im_end|>                                                                      │
+│ <|im_start|>user                                                                            │
+│ <tool_response>                                                                             │
+│ [{"totalWickets": 107}]                                                                     │
+│ </tool_response><|im_end|>                                                                  │
+│ <|im_start|>assistant                                                                       │
+│ <think>                                                                                     │
+│                                                                                             │
+│ </think>                                                                                    │
+│                                                                                             │
+│                                                                                             │
+╰─────────────────────────────────────────────────────────────────────────────────────────────╯
+Turn 3: model generating 41 action tokens...
+╭───────────────────────────── Turn 3 — MODEL OUTPUT (41 tokens) ─────────────────────────────╮
+│ <tool_call>                                                                                 │
+│ {"name": "final_answer", "arguments": {"answer": "Rashid Khan took a total of 107 wickets   │
+│ across all IPL seasons in this dataset."}}                                                  │
+│ </tool_call><|im_end|>                                                                      │
+╰─────────────────────────────────────────────────────────────────────────────────────────────╯
+  Observation total: 13 chunk(s) in ModelInput
+  Reward: 0.4
+  Metrics: {'tool_stopped': 1.0, 'reward/number_match': 0.0, 'reward/entity_match': 1.0}
+
+───────────────────────────────────────────── END ─────────────────────────────────────────────
+╭────────────────────────────────────────── Summary ──────────────────────────────────────────╮
+│ Turns: 3                                                                                    │
+│ Final reward: 0.4                                                                           │
+│ Result: PASS                                                                                │
+╰─────────────────────────────────────────────────────────────────────────────────────────────╯
+Closing Neo4j driver...
+Done.

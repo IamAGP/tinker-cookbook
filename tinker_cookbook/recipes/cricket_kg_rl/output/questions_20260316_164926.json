@@ -1,0 +1,702 @@
+[
+  {
+    "question": "Who scored the most runs in IPL 2017?",
+    "answer": "DA Warner with 641 runs",
+    "category": "batting_season_stat",
+    "season": "2017",
+    "cypher": "MATCH (p:Player)-[:BATTING_PERFORMANCE]->(bp:BattingPerformance)\n              -[:PERFORMANCE_IN_INNINGS]->(i:Innings)<-[:HAS_INNINGS]-(m:Match)\n        WHERE m.season = $season\n        WITH p.name AS player, sum(bp.runsScored) AS total\n        ORDER BY total DESC LIMIT 1\n        RETURN player, total"
+  },
+  {
+    "question": "Who took the most wickets in IPL 2017?",
+    "answer": "B Kumar with 28 wickets",
+    "category": "bowling_season_stat",
+    "season": "2017",
+    "cypher": "MATCH (p:Player)-[:BOWLING_PERFORMANCE]->(bp:BowlingPerformance)\n              -[:BOWLING_IN_INNINGS]->(i:Innings)<-[:HAS_INNINGS]-(m:Match)\n        WHERE m.season = $season\n        WITH p.name AS player, sum(bp.wicketsTaken) AS total\n        ORDER BY total DESC LIMIT 1\n        RETURN player, total"
+  },
+  {
+    "question": "Which player hit the most sixes in IPL 2017?",
+    "answer": "DA Warner with 26 sixes",
+    "category": "batting_season_stat",
+    "season": "2017",
+    "cypher": "MATCH (p:Player)-[:BATTING_PERFORMANCE]->(bp:BattingPerformance)\n              -[:PERFORMANCE_IN_INNINGS]->(i:Innings)<-[:HAS_INNINGS]-(m:Match)\n        WHERE m.season = $season\n        WITH p.name AS player, sum(bp.sixes) AS total\n        ORDER BY total DESC LIMIT 1\n        RETURN player, total"
+  },
+  {
+    "question": "Which player hit the most fours in IPL 2017?",
+    "answer": "DA Warner with 63 fours",
+    "category": "batting_season_stat",
+    "season": "2017",
+    "cypher": "MATCH (p:Player)-[:BATTING_PERFORMANCE]->(bp:BattingPerformance)\n              -[:PERFORMANCE_IN_INNINGS]->(i:Innings)<-[:HAS_INNINGS]-(m:Match)\n        WHERE m.season = $season\n        WITH p.name AS player, sum(bp.fours) AS total\n        ORDER BY total DESC LIMIT 1\n        RETURN player, total"
+  },
+  {
+    "question": "What was the highest individual score in IPL 2017?",
+    "answer": "DA Warner scored 126 runs off 60 balls",
+    "category": "batting_season_stat",
+    "season": "2017",
+    "cypher": "MATCH (p:Player)-[:BATTING_PERFORMANCE]->(bp:BattingPerformance)\n              -[:PERFORMANCE_IN_INNINGS]->(i:Innings)<-[:HAS_INNINGS]-(m:Match)\n        WHERE m.season = $season\n        WITH p.name AS player, bp.runsScored AS runs, bp.ballsFaced AS balls\n        ORDER BY runs DESC LIMIT 1\n        RETURN player, runs, balls"
+  },
+  {
+    "question": "Which bowler had the best economy rate in IPL 2017 (minimum 10 overs)?",
+    "answer": "Mohammad Nabi with an economy of 5.36",
+    "category": "bowling_season_stat",
+    "season": "2017",
+    "cypher": "MATCH (p:Player)-[:BOWLING_PERFORMANCE]->(bp:BowlingPerformance)\n              -[:BOWLING_IN_INNINGS]->(i:Innings)<-[:HAS_INNINGS]-(m:Match)\n        WHERE m.season = $season\n        WITH p.name AS player,\n             sum(bp.oversBowled) AS total_overs,\n             sum(bp.runsConceded) AS total_runs\n        WHERE total_overs >= $min_overs\n        WITH player, round(toFloat(total_runs) / total_overs, 2) AS economy\n        ORDER BY economy ASC LIMIT 1\n        RETURN player, economy"
+  },
+  {
+    "question": "Which bowler bowled the most dot balls in IPL 2017?",
+    "answer": "SP Narine with 133 dot balls",
+    "category": "bowling_season_stat",
+    "season": "2017",
+    "cypher": "MATCH (p:Player)-[:BOWLING_PERFORMANCE]->(bp:BowlingPerformance)\n              -[:BOWLING_IN_INNINGS]->(i:Innings)<-[:HAS_INNINGS]-(m:Match)\n        WHERE m.season = $season\n        WITH p.name AS player, sum(bp.dotBalls) AS total\n        ORDER BY total DESC LIMIT 1\n        RETURN player, total"
+  },
+  {
+    "question": "Which team won the most matches in IPL 2017?",
+    "answer": "Mumbai Indians with 11 wins",
+    "category": "team_season_stat",
+    "season": "2017",
+    "cypher": "MATCH (t:Team)-[:WON_MATCH]->(m:Match)\n        WHERE m.season = $season\n        WITH t.name AS team, count(m) AS wins\n        ORDER BY wins DESC LIMIT 1\n        RETURN team, wins"
+  },
+  {
+    "question": "Who won the most Player of the Match awards in IPL 2017?",
+    "answer": "BA Stokes with 3 awards",
+    "category": "player_of_match",
+    "season": "2017",
+    "cypher": "MATCH (p:Player)-[:PLAYER_OF_MATCH]->(m:Match)\n        WHERE m.season = $season\n        WITH p.name AS player, count(m) AS awards\n        ORDER BY awards DESC LIMIT 1\n        RETURN player, awards"
+  },
+  {
+    "question": "Which batsman was caught out the most times in IPL 2017?",
+    "answer": "KA Pollard caught out 14 times",
+    "category": "dismissal_stat",
+    "season": "2017",
+    "cypher": "MATCH (p:Player)-[:DISMISSED]->(w:Wicket)\n              <-[:RESULTED_IN_WICKET]-(:Delivery)\n              <-[:HAS_DELIVERY]-(:Over)\n              <-[:HAS_OVER]-(i:Innings)\n              <-[:HAS_INNINGS]-(m:Match)\n        WHERE m.season = $season AND w.dismissalKind = 'caught'\n        WITH p.name AS player, count(w) AS times\n        ORDER BY times DESC LIMIT 1\n        RETURN player, times"
+  },
+  {
+    "question": "Who scored the most runs in IPL 2018?",
+    "answer": "KS Williamson with 735 runs",
+    "category": "batting_season_stat",
+    "season": "2018",
+    "cypher": "MATCH (p:Player)-[:BATTING_PERFORMANCE]->(bp:BattingPerformance)\n              -[:PERFORMANCE_IN_INNINGS]->(i:Innings)<-[:HAS_INNINGS]-(m:Match)\n        WHERE m.season = $season\n        WITH p.name AS player, sum(bp.runsScored) AS total\n        ORDER BY total DESC LIMIT 1\n        RETURN player, total"
+  },
+  {
+    "question": "Who took the most wickets in IPL 2018?",
+    "answer": "AJ Tye with 28 wickets",
+    "category": "bowling_season_stat",
+    "season": "2018",
+    "cypher": "MATCH (p:Player)-[:BOWLING_PERFORMANCE]->(bp:BowlingPerformance)\n              -[:BOWLING_IN_INNINGS]->(i:Innings)<-[:HAS_INNINGS]-(m:Match)\n        WHERE m.season = $season\n        WITH p.name AS player, sum(bp.wicketsTaken) AS total\n        ORDER BY total DESC LIMIT 1\n        RETURN player, total"
+  },
+  {
+    "question": "Which player hit the most sixes in IPL 2018?",
+    "answer": "RR Pant with 37 sixes",
+    "category": "batting_season_stat",
+    "season": "2018",
+    "cypher": "MATCH (p:Player)-[:BATTING_PERFORMANCE]->(bp:BattingPerformance)\n              -[:PERFORMANCE_IN_INNINGS]->(i:Innings)<-[:HAS_INNINGS]-(m:Match)\n        WHERE m.season = $season\n        WITH p.name AS player, sum(bp.sixes) AS total\n        ORDER BY total DESC LIMIT 1\n        RETURN player, total"
+  },
+  {
+    "question": "Which player hit the most fours in IPL 2018?",
+    "answer": "RR Pant with 68 fours",
+    "category": "batting_season_stat",
+    "season": "2018",
+    "cypher": "MATCH (p:Player)-[:BATTING_PERFORMANCE]->(bp:BattingPerformance)\n              -[:PERFORMANCE_IN_INNINGS]->(i:Innings)<-[:HAS_INNINGS]-(m:Match)\n        WHERE m.season = $season\n        WITH p.name AS player, sum(bp.fours) AS total\n        ORDER BY total DESC LIMIT 1\n        RETURN player, total"
+  },
+  {
+    "question": "What was the highest individual score in IPL 2018?",
+    "answer": "RR Pant scored 128 runs off 64 balls",
+    "category": "batting_season_stat",
+    "season": "2018",
+    "cypher": "MATCH (p:Player)-[:BATTING_PERFORMANCE]->(bp:BattingPerformance)\n              -[:PERFORMANCE_IN_INNINGS]->(i:Innings)<-[:HAS_INNINGS]-(m:Match)\n        WHERE m.season = $season\n        WITH p.name AS player, bp.runsScored AS runs, bp.ballsFaced AS balls\n        ORDER BY runs DESC LIMIT 1\n        RETURN player, runs, balls"
+  },
+  {
+    "question": "Which bowler had the best economy rate in IPL 2018 (minimum 10 overs)?",
+    "answer": "IS Sodhi with an economy of 5.96",
+    "category": "bowling_season_stat",
+    "season": "2018",
+    "cypher": "MATCH (p:Player)-[:BOWLING_PERFORMANCE]->(bp:BowlingPerformance)\n              -[:BOWLING_IN_INNINGS]->(i:Innings)<-[:HAS_INNINGS]-(m:Match)\n        WHERE m.season = $season\n        WITH p.name AS player,\n             sum(bp.oversBowled) AS total_overs,\n             sum(bp.runsConceded) AS total_runs\n        WHERE total_overs >= $min_overs\n        WITH player, round(toFloat(total_runs) / total_overs, 2) AS economy\n        ORDER BY economy ASC LIMIT 1\n        RETURN player, economy"
+  },
+  {
+    "question": "Which bowler bowled the most dot balls in IPL 2018?",
+    "answer": "Rashid Khan with 162 dot balls",
+    "category": "bowling_season_stat",
+    "season": "2018",
+    "cypher": "MATCH (p:Player)-[:BOWLING_PERFORMANCE]->(bp:BowlingPerformance)\n              -[:BOWLING_IN_INNINGS]->(i:Innings)<-[:HAS_INNINGS]-(m:Match)\n        WHERE m.season = $season\n        WITH p.name AS player, sum(bp.dotBalls) AS total\n        ORDER BY total DESC LIMIT 1\n        RETURN player, total"
+  },
+  {
+    "question": "Which team won the most matches in IPL 2018?",
+    "answer": "Chennai Super Kings with 11 wins",
+    "category": "team_season_stat",
+    "season": "2018",
+    "cypher": "MATCH (t:Team)-[:WON_MATCH]->(m:Match)\n        WHERE m.season = $season\n        WITH t.name AS team, count(m) AS wins\n        ORDER BY wins DESC LIMIT 1\n        RETURN team, wins"
+  },
+  {
+    "question": "Who won the most Player of the Match awards in IPL 2018?",
+    "answer": "Rashid Khan with 4 awards",
+    "category": "player_of_match",
+    "season": "2018",
+    "cypher": "MATCH (p:Player)-[:PLAYER_OF_MATCH]->(m:Match)\n        WHERE m.season = $season\n        WITH p.name AS player, count(m) AS awards\n        ORDER BY awards DESC LIMIT 1\n        RETURN player, awards"
+  },
+  {
+    "question": "Which batsman was caught out the most times in IPL 2018?",
+    "answer": "SP Narine caught out 13 times",
+    "category": "dismissal_stat",
+    "season": "2018",
+    "cypher": "MATCH (p:Player)-[:DISMISSED]->(w:Wicket)\n              <-[:RESULTED_IN_WICKET]-(:Delivery)\n              <-[:HAS_DELIVERY]-(:Over)\n              <-[:HAS_OVER]-(i:Innings)\n              <-[:HAS_INNINGS]-(m:Match)\n        WHERE m.season = $season AND w.dismissalKind = 'caught'\n        WITH p.name AS player, count(w) AS times\n        ORDER BY times DESC LIMIT 1\n        RETURN player, times"
+  },
+  {
+    "question": "Who scored the most runs in IPL 2019?",
+    "answer": "DA Warner with 692 runs",
+    "category": "batting_season_stat",
+    "season": "2019",
+    "cypher": "MATCH (p:Player)-[:BATTING_PERFORMANCE]->(bp:BattingPerformance)\n              -[:PERFORMANCE_IN_INNINGS]->(i:Innings)<-[:HAS_INNINGS]-(m:Match)\n        WHERE m.season = $season\n        WITH p.name AS player, sum(bp.runsScored) AS total\n        ORDER BY total DESC LIMIT 1\n        RETURN player, total"
+  },
+  {
+    "question": "Who took the most wickets in IPL 2019?",
+    "answer": "K Rabada with 29 wickets",
+    "category": "bowling_season_stat",
+    "season": "2019",
+    "cypher": "MATCH (p:Player)-[:BOWLING_PERFORMANCE]->(bp:BowlingPerformance)\n              -[:BOWLING_IN_INNINGS]->(i:Innings)<-[:HAS_INNINGS]-(m:Match)\n        WHERE m.season = $season\n        WITH p.name AS player, sum(bp.wicketsTaken) AS total\n        ORDER BY total DESC LIMIT 1\n        RETURN player, total"
+  },
+  {
+    "question": "Which player hit the most sixes in IPL 2019?",
+    "answer": "AD Russell with 52 sixes",
+    "category": "batting_season_stat",
+    "season": "2019",
+    "cypher": "MATCH (p:Player)-[:BATTING_PERFORMANCE]->(bp:BattingPerformance)\n              -[:PERFORMANCE_IN_INNINGS]->(i:Innings)<-[:HAS_INNINGS]-(m:Match)\n        WHERE m.season = $season\n        WITH p.name AS player, sum(bp.sixes) AS total\n        ORDER BY total DESC LIMIT 1\n        RETURN player, total"
+  },
+  {
+    "question": "Which player hit the most fours in IPL 2019?",
+    "answer": "S Dhawan with 64 fours",
+    "category": "batting_season_stat",
+    "season": "2019",
+    "cypher": "MATCH (p:Player)-[:BATTING_PERFORMANCE]->(bp:BattingPerformance)\n              -[:PERFORMANCE_IN_INNINGS]->(i:Innings)<-[:HAS_INNINGS]-(m:Match)\n        WHERE m.season = $season\n        WITH p.name AS player, sum(bp.fours) AS total\n        ORDER BY total DESC LIMIT 1\n        RETURN player, total"
+  },
+  {
+    "question": "What was the highest individual score in IPL 2019?",
+    "answer": "JM Bairstow scored 114 runs off 57 balls",
+    "category": "batting_season_stat",
+    "season": "2019",
+    "cypher": "MATCH (p:Player)-[:BATTING_PERFORMANCE]->(bp:BattingPerformance)\n              -[:PERFORMANCE_IN_INNINGS]->(i:Innings)<-[:HAS_INNINGS]-(m:Match)\n        WHERE m.season = $season\n        WITH p.name AS player, bp.runsScored AS runs, bp.ballsFaced AS balls\n        ORDER BY runs DESC LIMIT 1\n        RETURN player, runs, balls"
+  },
+  {
+    "question": "Which bowler had the best economy rate in IPL 2019 (minimum 10 overs)?",
+    "answer": "RA Jadeja with an economy of 6.43",
+    "category": "bowling_season_stat",
+    "season": "2019",
+    "cypher": "MATCH (p:Player)-[:BOWLING_PERFORMANCE]->(bp:BowlingPerformance)\n              -[:BOWLING_IN_INNINGS]->(i:Innings)<-[:HAS_INNINGS]-(m:Match)\n        WHERE m.season = $season\n        WITH p.name AS player,\n             sum(bp.oversBowled) AS total_overs,\n             sum(bp.runsConceded) AS total_runs\n        WHERE total_overs >= $min_overs\n        WITH player, round(toFloat(total_runs) / total_overs, 2) AS economy\n        ORDER BY economy ASC LIMIT 1\n        RETURN player, economy"
+  },
+  {
+    "question": "Which bowler bowled the most dot balls in IPL 2019?",
+    "answer": "DL Chahar with 186 dot balls",
+    "category": "bowling_season_stat",
+    "season": "2019",
+    "cypher": "MATCH (p:Player)-[:BOWLING_PERFORMANCE]->(bp:BowlingPerformance)\n              -[:BOWLING_IN_INNINGS]->(i:Innings)<-[:HAS_INNINGS]-(m:Match)\n        WHERE m.season = $season\n        WITH p.name AS player, sum(bp.dotBalls) AS total\n        ORDER BY total DESC LIMIT 1\n        RETURN player, total"
+  },
+  {
+    "question": "Which team won the most matches in IPL 2019?",
+    "answer": "Chennai Super Kings with 10 wins",
+    "category": "team_season_stat",
+    "season": "2019",
+    "cypher": "MATCH (t:Team)-[:WON_MATCH]->(m:Match)\n        WHERE m.season = $season\n        WITH t.name AS team, count(m) AS wins\n        ORDER BY wins DESC LIMIT 1\n        RETURN team, wins"
+  },
+  {
+    "question": "Who won the most Player of the Match awards in IPL 2019?",
+    "answer": "AD Russell with 4 awards",
+    "category": "player_of_match",
+    "season": "2019",
+    "cypher": "MATCH (p:Player)-[:PLAYER_OF_MATCH]->(m:Match)\n        WHERE m.season = $season\n        WITH p.name AS player, count(m) AS awards\n        ORDER BY awards DESC LIMIT 1\n        RETURN player, awards"
+  },
+  {
+    "question": "Which batsman was caught out the most times in IPL 2019?",
+    "answer": "V Kohli caught out 12 times",
+    "category": "dismissal_stat",
+    "season": "2019",
+    "cypher": "MATCH (p:Player)-[:DISMISSED]->(w:Wicket)\n              <-[:RESULTED_IN_WICKET]-(:Delivery)\n              <-[:HAS_DELIVERY]-(:Over)\n              <-[:HAS_OVER]-(i:Innings)\n              <-[:HAS_INNINGS]-(m:Match)\n        WHERE m.season = $season AND w.dismissalKind = 'caught'\n        WITH p.name AS player, count(w) AS times\n        ORDER BY times DESC LIMIT 1\n        RETURN player, times"
+  },
+  {
+    "question": "Who scored the most runs in IPL 2020/21?",
+    "answer": "KL Rahul with 676 runs",
+    "category": "batting_season_stat",
+    "season": "2020/21",
+    "cypher": "MATCH (p:Player)-[:BATTING_PERFORMANCE]->(bp:BattingPerformance)\n              -[:PERFORMANCE_IN_INNINGS]->(i:Innings)<-[:HAS_INNINGS]-(m:Match)\n        WHERE m.season = $season\n        WITH p.name AS player, sum(bp.runsScored) AS total\n        ORDER BY total DESC LIMIT 1\n        RETURN player, total"
+  },
+  {
+    "question": "Who took the most wickets in IPL 2020/21?",
+    "answer": "K Rabada with 32 wickets",
+    "category": "bowling_season_stat",
+    "season": "2020/21",
+    "cypher": "MATCH (p:Player)-[:BOWLING_PERFORMANCE]->(bp:BowlingPerformance)\n              -[:BOWLING_IN_INNINGS]->(i:Innings)<-[:HAS_INNINGS]-(m:Match)\n        WHERE m.season = $season\n        WITH p.name AS player, sum(bp.wicketsTaken) AS total\n        ORDER BY total DESC LIMIT 1\n        RETURN player, total"
+  },
+  {
+    "question": "Which player hit the most sixes in IPL 2020/21?",
+    "answer": "Ishan Kishan with 30 sixes",
+    "category": "batting_season_stat",
+    "season": "2020/21",
+    "cypher": "MATCH (p:Player)-[:BATTING_PERFORMANCE]->(bp:BattingPerformance)\n              -[:PERFORMANCE_IN_INNINGS]->(i:Innings)<-[:HAS_INNINGS]-(m:Match)\n        WHERE m.season = $season\n        WITH p.name AS player, sum(bp.sixes) AS total\n        ORDER BY total DESC LIMIT 1\n        RETURN player, total"
+  },
+  {
+    "question": "Which player hit the most fours in IPL 2020/21?",
+    "answer": "S Dhawan with 67 fours",
+    "category": "batting_season_stat",
+    "season": "2020/21",
+    "cypher": "MATCH (p:Player)-[:BATTING_PERFORMANCE]->(bp:BattingPerformance)\n              -[:PERFORMANCE_IN_INNINGS]->(i:Innings)<-[:HAS_INNINGS]-(m:Match)\n        WHERE m.season = $season\n        WITH p.name AS player, sum(bp.fours) AS total\n        ORDER BY total DESC LIMIT 1\n        RETURN player, total"
+  },
+  {
+    "question": "What was the highest individual score in IPL 2020/21?",
+    "answer": "KL Rahul scored 132 runs off 70 balls",
+    "category": "batting_season_stat",
+    "season": "2020/21",
+    "cypher": "MATCH (p:Player)-[:BATTING_PERFORMANCE]->(bp:BattingPerformance)\n              -[:PERFORMANCE_IN_INNINGS]->(i:Innings)<-[:HAS_INNINGS]-(m:Match)\n        WHERE m.season = $season\n        WITH p.name AS player, bp.runsScored AS runs, bp.ballsFaced AS balls\n        ORDER BY runs DESC LIMIT 1\n        RETURN player, runs, balls"
+  },
+  {
+    "question": "Which bowler had the best economy rate in IPL 2020/21 (minimum 10 overs)?",
+    "answer": "Rashid Khan with an economy of 5.51",
+    "category": "bowling_season_stat",
+    "season": "2020/21",
+    "cypher": "MATCH (p:Player)-[:BOWLING_PERFORMANCE]->(bp:BowlingPerformance)\n              -[:BOWLING_IN_INNINGS]->(i:Innings)<-[:HAS_INNINGS]-(m:Match)\n        WHERE m.season = $season\n        WITH p.name AS player,\n             sum(bp.oversBowled) AS total_overs,\n             sum(bp.runsConceded) AS total_runs\n        WHERE total_overs >= $min_overs\n        WITH player, round(toFloat(total_runs) / total_overs, 2) AS economy\n        ORDER BY economy ASC LIMIT 1\n        RETURN player, economy"
+  },
+  {
+    "question": "Which bowler bowled the most dot balls in IPL 2020/21?",
+    "answer": "JC Archer with 171 dot balls",
+    "category": "bowling_season_stat",
+    "season": "2020/21",
+    "cypher": "MATCH (p:Player)-[:BOWLING_PERFORMANCE]->(bp:BowlingPerformance)\n              -[:BOWLING_IN_INNINGS]->(i:Innings)<-[:HAS_INNINGS]-(m:Match)\n        WHERE m.season = $season\n        WITH p.name AS player, sum(bp.dotBalls) AS total\n        ORDER BY total DESC LIMIT 1\n        RETURN player, total"
+  },
+  {
+    "question": "Which team won the most matches in IPL 2020/21?",
+    "answer": "Mumbai Indians with 11 wins",
+    "category": "team_season_stat",
+    "season": "2020/21",
+    "cypher": "MATCH (t:Team)-[:WON_MATCH]->(m:Match)\n        WHERE m.season = $season\n        WITH t.name AS team, count(m) AS wins\n        ORDER BY wins DESC LIMIT 1\n        RETURN team, wins"
+  },
+  {
+    "question": "Who won the most Player of the Match awards in IPL 2020/21?",
+    "answer": "RD Gaikwad with 3 awards",
+    "category": "player_of_match",
+    "season": "2020/21",
+    "cypher": "MATCH (p:Player)-[:PLAYER_OF_MATCH]->(m:Match)\n        WHERE m.season = $season\n        WITH p.name AS player, count(m) AS awards\n        ORDER BY awards DESC LIMIT 1\n        RETURN player, awards"
+  },
+  {
+    "question": "Which batsman was caught out the most times in IPL 2020/21?",
+    "answer": "SS Iyer caught out 13 times",
+    "category": "dismissal_stat",
+    "season": "2020/21",
+    "cypher": "MATCH (p:Player)-[:DISMISSED]->(w:Wicket)\n              <-[:RESULTED_IN_WICKET]-(:Delivery)\n              <-[:HAS_DELIVERY]-(:Over)\n              <-[:HAS_OVER]-(i:Innings)\n              <-[:HAS_INNINGS]-(m:Match)\n        WHERE m.season = $season AND w.dismissalKind = 'caught'\n        WITH p.name AS player, count(w) AS times\n        ORDER BY times DESC LIMIT 1\n        RETURN player, times"
+  },
+  {
+    "question": "Who scored the most runs in IPL 2021?",
+    "answer": "RD Gaikwad with 635 runs",
+    "category": "batting_season_stat",
+    "season": "2021",
+    "cypher": "MATCH (p:Player)-[:BATTING_PERFORMANCE]->(bp:BattingPerformance)\n              -[:PERFORMANCE_IN_INNINGS]->(i:Innings)<-[:HAS_INNINGS]-(m:Match)\n        WHERE m.season = $season\n        WITH p.name AS player, sum(bp.runsScored) AS total\n        ORDER BY total DESC LIMIT 1\n        RETURN player, total"
+  },
+  {
+    "question": "Who took the most wickets in IPL 2021?",
+    "answer": "HV Patel with 35 wickets",
+    "category": "bowling_season_stat",
+    "season": "2021",
+    "cypher": "MATCH (p:Player)-[:BOWLING_PERFORMANCE]->(bp:BowlingPerformance)\n              -[:BOWLING_IN_INNINGS]->(i:Innings)<-[:HAS_INNINGS]-(m:Match)\n        WHERE m.season = $season\n        WITH p.name AS player, sum(bp.wicketsTaken) AS total\n        ORDER BY total DESC LIMIT 1\n        RETURN player, total"
+  },
+  {
+    "question": "Which player hit the most sixes in IPL 2021?",
+    "answer": "KL Rahul with 30 sixes",
+    "category": "batting_season_stat",
+    "season": "2021",
+    "cypher": "MATCH (p:Player)-[:BATTING_PERFORMANCE]->(bp:BattingPerformance)\n              -[:PERFORMANCE_IN_INNINGS]->(i:Innings)<-[:HAS_INNINGS]-(m:Match)\n        WHERE m.season = $season\n        WITH p.name AS player, sum(bp.sixes) AS total\n        ORDER BY total DESC LIMIT 1\n        RETURN player, total"
+  },
+  {
+    "question": "Which player hit the most fours in IPL 2021?",
+    "answer": "RD Gaikwad with 64 fours",
+    "category": "batting_season_stat",
+    "season": "2021",
+    "cypher": "MATCH (p:Player)-[:BATTING_PERFORMANCE]->(bp:BattingPerformance)\n              -[:PERFORMANCE_IN_INNINGS]->(i:Innings)<-[:HAS_INNINGS]-(m:Match)\n        WHERE m.season = $season\n        WITH p.name AS player, sum(bp.fours) AS total\n        ORDER BY total DESC LIMIT 1\n        RETURN player, total"
+  },
+  {
+    "question": "What was the highest individual score in IPL 2021?",
+    "answer": "JC Buttler scored 124 runs off 69 balls",
+    "category": "batting_season_stat",
+    "season": "2021",
+    "cypher": "MATCH (p:Player)-[:BATTING_PERFORMANCE]->(bp:BattingPerformance)\n              -[:PERFORMANCE_IN_INNINGS]->(i:Innings)<-[:HAS_INNINGS]-(m:Match)\n        WHERE m.season = $season\n        WITH p.name AS player, bp.runsScored AS runs, bp.ballsFaced AS balls\n        ORDER BY runs DESC LIMIT 1\n        RETURN player, runs, balls"
+  },
+  {
+    "question": "Which bowler had the best economy rate in IPL 2021 (minimum 10 overs)?",
+    "answer": "MC Henriques with an economy of 4.7",
+    "category": "bowling_season_stat",
+    "season": "2021",
+    "cypher": "MATCH (p:Player)-[:BOWLING_PERFORMANCE]->(bp:BowlingPerformance)\n              -[:BOWLING_IN_INNINGS]->(i:Innings)<-[:HAS_INNINGS]-(m:Match)\n        WHERE m.season = $season\n        WITH p.name AS player,\n             sum(bp.oversBowled) AS total_overs,\n             sum(bp.runsConceded) AS total_runs\n        WHERE total_overs >= $min_overs\n        WITH player, round(toFloat(total_runs) / total_overs, 2) AS economy\n        ORDER BY economy ASC LIMIT 1\n        RETURN player, economy"
+  },
+  {
+    "question": "Which bowler bowled the most dot balls in IPL 2021?",
+    "answer": "Avesh Khan with 146 dot balls",
+    "category": "bowling_season_stat",
+    "season": "2021",
+    "cypher": "MATCH (p:Player)-[:BOWLING_PERFORMANCE]->(bp:BowlingPerformance)\n              -[:BOWLING_IN_INNINGS]->(i:Innings)<-[:HAS_INNINGS]-(m:Match)\n        WHERE m.season = $season\n        WITH p.name AS player, sum(bp.dotBalls) AS total\n        ORDER BY total DESC LIMIT 1\n        RETURN player, total"
+  },
+  {
+    "question": "Which team won the most matches in IPL 2021?",
+    "answer": "Chennai Super Kings with 11 wins",
+    "category": "team_season_stat",
+    "season": "2021",
+    "cypher": "MATCH (t:Team)-[:WON_MATCH]->(m:Match)\n        WHERE m.season = $season\n        WITH t.name AS team, count(m) AS wins\n        ORDER BY wins DESC LIMIT 1\n        RETURN team, wins"
+  },
+  {
+    "question": "Who won the most Player of the Match awards in IPL 2021?",
+    "answer": "RD Gaikwad with 4 awards",
+    "category": "player_of_match",
+    "season": "2021",
+    "cypher": "MATCH (p:Player)-[:PLAYER_OF_MATCH]->(m:Match)\n        WHERE m.season = $season\n        WITH p.name AS player, count(m) AS awards\n        ORDER BY awards DESC LIMIT 1\n        RETURN player, awards"
+  },
+  {
+    "question": "Which batsman was caught out the most times in IPL 2021?",
+    "answer": "RD Gaikwad caught out 13 times",
+    "category": "dismissal_stat",
+    "season": "2021",
+    "cypher": "MATCH (p:Player)-[:DISMISSED]->(w:Wicket)\n              <-[:RESULTED_IN_WICKET]-(:Delivery)\n              <-[:HAS_DELIVERY]-(:Over)\n              <-[:HAS_OVER]-(i:Innings)\n              <-[:HAS_INNINGS]-(m:Match)\n        WHERE m.season = $season AND w.dismissalKind = 'caught'\n        WITH p.name AS player, count(w) AS times\n        ORDER BY times DESC LIMIT 1\n        RETURN player, times"
+  },
+  {
+    "question": "Who scored the most runs in IPL 2022?",
+    "answer": "JC Buttler with 499 runs",
+    "category": "batting_season_stat",
+    "season": "2022",
+    "cypher": "MATCH (p:Player)-[:BATTING_PERFORMANCE]->(bp:BattingPerformance)\n              -[:PERFORMANCE_IN_INNINGS]->(i:Innings)<-[:HAS_INNINGS]-(m:Match)\n        WHERE m.season = $season\n        WITH p.name AS player, sum(bp.runsScored) AS total\n        ORDER BY total DESC LIMIT 1\n        RETURN player, total"
+  },
+  {
+    "question": "Who took the most wickets in IPL 2022?",
+    "answer": "YS Chahal with 20 wickets",
+    "category": "bowling_season_stat",
+    "season": "2022",
+    "cypher": "MATCH (p:Player)-[:BOWLING_PERFORMANCE]->(bp:BowlingPerformance)\n              -[:BOWLING_IN_INNINGS]->(i:Innings)<-[:HAS_INNINGS]-(m:Match)\n        WHERE m.season = $season\n        WITH p.name AS player, sum(bp.wicketsTaken) AS total\n        ORDER BY total DESC LIMIT 1\n        RETURN player, total"
+  },
+  {
+    "question": "Which player hit the most sixes in IPL 2022?",
+    "answer": "JC Buttler with 32 sixes",
+    "category": "batting_season_stat",
+    "season": "2022",
+    "cypher": "MATCH (p:Player)-[:BATTING_PERFORMANCE]->(bp:BattingPerformance)\n              -[:PERFORMANCE_IN_INNINGS]->(i:Innings)<-[:HAS_INNINGS]-(m:Match)\n        WHERE m.season = $season\n        WITH p.name AS player, sum(bp.sixes) AS total\n        ORDER BY total DESC LIMIT 1\n        RETURN player, total"
+  },
+  {
+    "question": "Which player hit the most fours in IPL 2022?",
+    "answer": "JC Buttler with 43 fours",
+    "category": "batting_season_stat",
+    "season": "2022",
+    "cypher": "MATCH (p:Player)-[:BATTING_PERFORMANCE]->(bp:BattingPerformance)\n              -[:PERFORMANCE_IN_INNINGS]->(i:Innings)<-[:HAS_INNINGS]-(m:Match)\n        WHERE m.season = $season\n        WITH p.name AS player, sum(bp.fours) AS total\n        ORDER BY total DESC LIMIT 1\n        RETURN player, total"
+  },
+  {
+    "question": "What was the highest individual score in IPL 2022?",
+    "answer": "JC Buttler scored 116 runs off 66 balls",
+    "category": "batting_season_stat",
+    "season": "2022",
+    "cypher": "MATCH (p:Player)-[:BATTING_PERFORMANCE]->(bp:BattingPerformance)\n              -[:PERFORMANCE_IN_INNINGS]->(i:Innings)<-[:HAS_INNINGS]-(m:Match)\n        WHERE m.season = $season\n        WITH p.name AS player, bp.runsScored AS runs, bp.ballsFaced AS balls\n        ORDER BY runs DESC LIMIT 1\n        RETURN player, runs, balls"
+  },
+  {
+    "question": "Which bowler had the best economy rate in IPL 2022 (minimum 10 overs)?",
+    "answer": "SP Narine with an economy of 5.47",
+    "category": "bowling_season_stat",
+    "season": "2022",
+    "cypher": "MATCH (p:Player)-[:BOWLING_PERFORMANCE]->(bp:BowlingPerformance)\n              -[:BOWLING_IN_INNINGS]->(i:Innings)<-[:HAS_INNINGS]-(m:Match)\n        WHERE m.season = $season\n        WITH p.name AS player,\n             sum(bp.oversBowled) AS total_overs,\n             sum(bp.runsConceded) AS total_runs\n        WHERE total_overs >= $min_overs\n        WITH player, round(toFloat(total_runs) / total_overs, 2) AS economy\n        ORDER BY economy ASC LIMIT 1\n        RETURN player, economy"
+  },
+  {
+    "question": "Which bowler bowled the most dot balls in IPL 2022?",
+    "answer": "UT Yadav with 98 dot balls",
+    "category": "bowling_season_stat",
+    "season": "2022",
+    "cypher": "MATCH (p:Player)-[:BOWLING_PERFORMANCE]->(bp:BowlingPerformance)\n              -[:BOWLING_IN_INNINGS]->(i:Innings)<-[:HAS_INNINGS]-(m:Match)\n        WHERE m.season = $season\n        WITH p.name AS player, sum(bp.dotBalls) AS total\n        ORDER BY total DESC LIMIT 1\n        RETURN player, total"
+  },
+  {
+    "question": "Which team won the most matches in IPL 2022?",
+    "answer": "Gujarat Titans with 7 wins",
+    "category": "team_season_stat",
+    "season": "2022",
+    "cypher": "MATCH (t:Team)-[:WON_MATCH]->(m:Match)\n        WHERE m.season = $season\n        WITH t.name AS team, count(m) AS wins\n        ORDER BY wins DESC LIMIT 1\n        RETURN team, wins"
+  },
+  {
+    "question": "Who won the most Player of the Match awards in IPL 2022?",
+    "answer": "Kuldeep Yadav with 4 awards",
+    "category": "player_of_match",
+    "season": "2022",
+    "cypher": "MATCH (p:Player)-[:PLAYER_OF_MATCH]->(m:Match)\n        WHERE m.season = $season\n        WITH p.name AS player, count(m) AS awards\n        ORDER BY awards DESC LIMIT 1\n        RETURN player, awards"
+  },
+  {
+    "question": "Which batsman was caught out the most times in IPL 2022?",
+    "answer": "N Rana caught out 8 times",
+    "category": "dismissal_stat",
+    "season": "2022",
+    "cypher": "MATCH (p:Player)-[:DISMISSED]->(w:Wicket)\n              <-[:RESULTED_IN_WICKET]-(:Delivery)\n              <-[:HAS_DELIVERY]-(:Over)\n              <-[:HAS_OVER]-(i:Innings)\n              <-[:HAS_INNINGS]-(m:Match)\n        WHERE m.season = $season AND w.dismissalKind = 'caught'\n        WITH p.name AS player, count(w) AS times\n        ORDER BY times DESC LIMIT 1\n        RETURN player, times"
+  },
+  {
+    "question": "How many total runs did S Dhawan score across all IPL seasons in this dataset?",
+    "answer": "3004 runs in 88 innings",
+    "category": "career_stat",
+    "season": null,
+    "cypher": "MATCH (p:Player {name: $player})-[:BATTING_PERFORMANCE]->(bp:BattingPerformance)\n        RETURN sum(bp.runsScored) AS total, count(bp) AS innings"
+  },
+  {
+    "question": "How many total runs did KL Rahul score across all IPL seasons in this dataset?",
+    "answer": "2922 runs in 65 innings",
+    "category": "career_stat",
+    "season": null,
+    "cypher": "MATCH (p:Player {name: $player})-[:BATTING_PERFORMANCE]->(bp:BattingPerformance)\n        RETURN sum(bp.runsScored) AS total, count(bp) AS innings"
+  },
+  {
+    "question": "How many total runs did RR Pant score across all IPL seasons in this dataset?",
+    "answer": "2503 runs in 84 innings",
+    "category": "career_stat",
+    "season": null,
+    "cypher": "MATCH (p:Player {name: $player})-[:BATTING_PERFORMANCE]->(bp:BattingPerformance)\n        RETURN sum(bp.runsScored) AS total, count(bp) AS innings"
+  },
+  {
+    "question": "How many total runs did DA Warner score across all IPL seasons in this dataset?",
+    "answer": "2339 runs in 58 innings",
+    "category": "career_stat",
+    "season": null,
+    "cypher": "MATCH (p:Player {name: $player})-[:BATTING_PERFORMANCE]->(bp:BattingPerformance)\n        RETURN sum(bp.runsScored) AS total, count(bp) AS innings"
+  },
+  {
+    "question": "How many total runs did V Kohli score across all IPL seasons in this dataset?",
+    "answer": "2306 runs in 78 innings",
+    "category": "career_stat",
+    "season": null,
+    "cypher": "MATCH (p:Player {name: $player})-[:BATTING_PERFORMANCE]->(bp:BattingPerformance)\n        RETURN sum(bp.runsScored) AS total, count(bp) AS innings"
+  },
+  {
+    "question": "How many total runs did SV Samson score across all IPL seasons in this dataset?",
+    "answer": "2256 runs in 76 innings",
+    "category": "career_stat",
+    "season": null,
+    "cypher": "MATCH (p:Player {name: $player})-[:BATTING_PERFORMANCE]->(bp:BattingPerformance)\n        RETURN sum(bp.runsScored) AS total, count(bp) AS innings"
+  },
+  {
+    "question": "How many total runs did JC Buttler score across all IPL seasons in this dataset?",
+    "answer": "2213 runs in 59 innings",
+    "category": "career_stat",
+    "season": null,
+    "cypher": "MATCH (p:Player {name: $player})-[:BATTING_PERFORMANCE]->(bp:BattingPerformance)\n        RETURN sum(bp.runsScored) AS total, count(bp) AS innings"
+  },
+  {
+    "question": "How many total runs did SS Iyer score across all IPL seasons in this dataset?",
+    "answer": "2200 runs in 76 innings",
+    "category": "career_stat",
+    "season": null,
+    "cypher": "MATCH (p:Player {name: $player})-[:BATTING_PERFORMANCE]->(bp:BattingPerformance)\n        RETURN sum(bp.runsScored) AS total, count(bp) AS innings"
+  },
+  {
+    "question": "How many total runs did SA Yadav score across all IPL seasons in this dataset?",
+    "answer": "2077 runs in 71 innings",
+    "category": "career_stat",
+    "season": null,
+    "cypher": "MATCH (p:Player {name: $player})-[:BATTING_PERFORMANCE]->(bp:BattingPerformance)\n        RETURN sum(bp.runsScored) AS total, count(bp) AS innings"
+  },
+  {
+    "question": "How many total runs did F du Plessis score across all IPL seasons in this dataset?",
+    "answer": "1926 runs in 57 innings",
+    "category": "career_stat",
+    "season": null,
+    "cypher": "MATCH (p:Player {name: $player})-[:BATTING_PERFORMANCE]->(bp:BattingPerformance)\n        RETURN sum(bp.runsScored) AS total, count(bp) AS innings"
+  },
+  {
+    "question": "How many total runs did N Rana score across all IPL seasons in this dataset?",
+    "answer": "1916 runs in 77 innings",
+    "category": "career_stat",
+    "season": null,
+    "cypher": "MATCH (p:Player {name: $player})-[:BATTING_PERFORMANCE]->(bp:BattingPerformance)\n        RETURN sum(bp.runsScored) AS total, count(bp) AS innings"
+  },
+  {
+    "question": "How many total runs did AB de Villiers score across all IPL seasons in this dataset?",
+    "answer": "1911 runs in 62 innings",
+    "category": "career_stat",
+    "season": null,
+    "cypher": "MATCH (p:Player {name: $player})-[:BATTING_PERFORMANCE]->(bp:BattingPerformance)\n        RETURN sum(bp.runsScored) AS total, count(bp) AS innings"
+  },
+  {
+    "question": "How many total runs did RG Sharma score across all IPL seasons in this dataset?",
+    "answer": "1892 runs in 79 innings",
+    "category": "career_stat",
+    "season": null,
+    "cypher": "MATCH (p:Player {name: $player})-[:BATTING_PERFORMANCE]->(bp:BattingPerformance)\n        RETURN sum(bp.runsScored) AS total, count(bp) AS innings"
+  },
+  {
+    "question": "How many total runs did KS Williamson score across all IPL seasons in this dataset?",
+    "answer": "1882 runs in 63 innings",
+    "category": "career_stat",
+    "season": null,
+    "cypher": "MATCH (p:Player {name: $player})-[:BATTING_PERFORMANCE]->(bp:BattingPerformance)\n        RETURN sum(bp.runsScored) AS total, count(bp) AS innings"
+  },
+  {
+    "question": "How many total runs did AT Rayudu score across all IPL seasons in this dataset?",
+    "answer": "1837 runs in 69 innings",
+    "category": "career_stat",
+    "season": null,
+    "cypher": "MATCH (p:Player {name: $player})-[:BATTING_PERFORMANCE]->(bp:BattingPerformance)\n        RETURN sum(bp.runsScored) AS total, count(bp) AS innings"
+  },
+  {
+    "question": "How many total runs did MK Pandey score across all IPL seasons in this dataset?",
+    "answer": "1830 runs in 66 innings",
+    "category": "career_stat",
+    "season": null,
+    "cypher": "MATCH (p:Player {name: $player})-[:BATTING_PERFORMANCE]->(bp:BattingPerformance)\n        RETURN sum(bp.runsScored) AS total, count(bp) AS innings"
+  },
+  {
+    "question": "How many total runs did Q de Kock score across all IPL seasons in this dataset?",
+    "answer": "1758 runs in 60 innings",
+    "category": "career_stat",
+    "season": null,
+    "cypher": "MATCH (p:Player {name: $player})-[:BATTING_PERFORMANCE]->(bp:BattingPerformance)\n        RETURN sum(bp.runsScored) AS total, count(bp) AS innings"
+  },
+  {
+    "question": "How many total runs did KD Karthik score across all IPL seasons in this dataset?",
+    "answer": "1721 runs in 81 innings",
+    "category": "career_stat",
+    "season": null,
+    "cypher": "MATCH (p:Player {name: $player})-[:BATTING_PERFORMANCE]->(bp:BattingPerformance)\n        RETURN sum(bp.runsScored) AS total, count(bp) AS innings"
+  },
+  {
+    "question": "How many total runs did Shubman Gill score across all IPL seasons in this dataset?",
+    "answer": "1646 runs in 62 innings",
+    "category": "career_stat",
+    "season": null,
+    "cypher": "MATCH (p:Player {name: $player})-[:BATTING_PERFORMANCE]->(bp:BattingPerformance)\n        RETURN sum(bp.runsScored) AS total, count(bp) AS innings"
+  },
+  {
+    "question": "How many total runs did HH Pandya score across all IPL seasons in this dataset?",
+    "answer": "1634 runs in 78 innings",
+    "category": "career_stat",
+    "season": null,
+    "cypher": "MATCH (p:Player {name: $player})-[:BATTING_PERFORMANCE]->(bp:BattingPerformance)\n        RETURN sum(bp.runsScored) AS total, count(bp) AS innings"
+  },
+  {
+    "question": "How many total wickets did JJ Bumrah take across all IPL seasons in this dataset?",
+    "answer": "121 wickets in 87 innings",
+    "category": "career_stat",
+    "season": null,
+    "cypher": "MATCH (p:Player {name: $player})-[:BOWLING_PERFORMANCE]->(bp:BowlingPerformance)\n        RETURN sum(bp.wicketsTaken) AS total, count(bp) AS innings"
+  },
+  {
+    "question": "How many total wickets did Rashid Khan take across all IPL seasons in this dataset?",
+    "answer": "107 wickets in 87 innings",
+    "category": "career_stat",
+    "season": null,
+    "cypher": "MATCH (p:Player {name: $player})-[:BOWLING_PERFORMANCE]->(bp:BowlingPerformance)\n        RETURN sum(bp.wicketsTaken) AS total, count(bp) AS innings"
+  },
+  {
+    "question": "How many total wickets did YS Chahal take across all IPL seasons in this dataset?",
+    "answer": "105 wickets in 79 innings",
+    "category": "career_stat",
+    "season": null,
+    "cypher": "MATCH (p:Player {name: $player})-[:BOWLING_PERFORMANCE]->(bp:BowlingPerformance)\n        RETURN sum(bp.wicketsTaken) AS total, count(bp) AS innings"
+  },
+  {
+    "question": "How many total wickets did K Rabada take across all IPL seasons in this dataset?",
+    "answer": "94 wickets in 59 innings",
+    "category": "career_stat",
+    "season": null,
+    "cypher": "MATCH (p:Player {name: $player})-[:BOWLING_PERFORMANCE]->(bp:BowlingPerformance)\n        RETURN sum(bp.wicketsTaken) AS total, count(bp) AS innings"
+  },
+  {
+    "question": "How many total wickets did Mohammed Shami take across all IPL seasons in this dataset?",
+    "answer": "89 wickets in 64 innings",
+    "category": "career_stat",
+    "season": null,
+    "cypher": "MATCH (p:Player {name: $player})-[:BOWLING_PERFORMANCE]->(bp:BowlingPerformance)\n        RETURN sum(bp.wicketsTaken) AS total, count(bp) AS innings"
+  },
+  {
+    "question": "How many total wickets did TA Boult take across all IPL seasons in this dataset?",
+    "answer": "79 wickets in 62 innings",
+    "category": "career_stat",
+    "season": null,
+    "cypher": "MATCH (p:Player {name: $player})-[:BOWLING_PERFORMANCE]->(bp:BowlingPerformance)\n        RETURN sum(bp.wicketsTaken) AS total, count(bp) AS innings"
+  },
+  {
+    "question": "How many total wickets did SN Thakur take across all IPL seasons in this dataset?",
+    "answer": "76 wickets in 67 innings",
+    "category": "career_stat",
+    "season": null,
+    "cypher": "MATCH (p:Player {name: $player})-[:BOWLING_PERFORMANCE]->(bp:BowlingPerformance)\n        RETURN sum(bp.wicketsTaken) AS total, count(bp) AS innings"
+  },
+  {
+    "question": "How many total wickets did SP Narine take across all IPL seasons in this dataset?",
+    "answer": "72 wickets in 76 innings",
+    "category": "career_stat",
+    "season": null,
+    "cypher": "MATCH (p:Player {name: $player})-[:BOWLING_PERFORMANCE]->(bp:BowlingPerformance)\n        RETURN sum(bp.wicketsTaken) AS total, count(bp) AS innings"
+  },
+  {
+    "question": "How many total wickets did B Kumar take across all IPL seasons in this dataset?",
+    "answer": "72 wickets in 64 innings",
+    "category": "career_stat",
+    "season": null,
+    "cypher": "MATCH (p:Player {name: $player})-[:BOWLING_PERFORMANCE]->(bp:BowlingPerformance)\n        RETURN sum(bp.wicketsTaken) AS total, count(bp) AS innings"
+  },
+  {
+    "question": "How many total wickets did DJ Bravo take across all IPL seasons in this dataset?",
+    "answer": "68 wickets in 53 innings",
+    "category": "career_stat",
+    "season": null,
+    "cypher": "MATCH (p:Player {name: $player})-[:BOWLING_PERFORMANCE]->(bp:BowlingPerformance)\n        RETURN sum(bp.wicketsTaken) AS total, count(bp) AS innings"
+  },
+  {
+    "question": "How many total wickets did JD Unadkat take across all IPL seasons in this dataset?",
+    "answer": "66 wickets in 56 innings",
+    "category": "career_stat",
+    "season": null,
+    "cypher": "MATCH (p:Player {name: $player})-[:BOWLING_PERFORMANCE]->(bp:BowlingPerformance)\n        RETURN sum(bp.wicketsTaken) AS total, count(bp) AS innings"
+  },
+  {
+    "question": "How many total wickets did UT Yadav take across all IPL seasons in this dataset?",
+    "answer": "62 wickets in 50 innings",
+    "category": "career_stat",
+    "season": null,
+    "cypher": "MATCH (p:Player {name: $player})-[:BOWLING_PERFORMANCE]->(bp:BowlingPerformance)\n        RETURN sum(bp.wicketsTaken) AS total, count(bp) AS innings"
+  },
+  {
+    "question": "How many total wickets did Sandeep Sharma take across all IPL seasons in this dataset?",
+    "answer": "62 wickets in 58 innings",
+    "category": "career_stat",
+    "season": null,
+    "cypher": "MATCH (p:Player {name: $player})-[:BOWLING_PERFORMANCE]->(bp:BowlingPerformance)\n        RETURN sum(bp.wicketsTaken) AS total, count(bp) AS innings"
+  },
+  {
+    "question": "How many total wickets did HV Patel take across all IPL seasons in this dataset?",
+    "answer": "61 wickets in 36 innings",
+    "category": "career_stat",
+    "season": null,
+    "cypher": "MATCH (p:Player {name: $player})-[:BOWLING_PERFORMANCE]->(bp:BowlingPerformance)\n        RETURN sum(bp.wicketsTaken) AS total, count(bp) AS innings"
+  },
+  {
+    "question": "How many total wickets did DL Chahar take across all IPL seasons in this dataset?",
+    "answer": "61 wickets in 61 innings",
+    "category": "career_stat",
+    "season": null,
+    "cypher": "MATCH (p:Player {name: $player})-[:BOWLING_PERFORMANCE]->(bp:BowlingPerformance)\n        RETURN sum(bp.wicketsTaken) AS total, count(bp) AS innings"
+  },
+  {
+    "question": "How many total wickets did AR Patel take across all IPL seasons in this dataset?",
+    "answer": "61 wickets in 72 innings",
+    "category": "career_stat",
+    "season": null,
+    "cypher": "MATCH (p:Player {name: $player})-[:BOWLING_PERFORMANCE]->(bp:BowlingPerformance)\n        RETURN sum(bp.wicketsTaken) AS total, count(bp) AS innings"
+  },
+  {
+    "question": "How many total wickets did Mohammed Siraj take across all IPL seasons in this dataset?",
+    "answer": "60 wickets in 59 innings",
+    "category": "career_stat",
+    "season": null,
+    "cypher": "MATCH (p:Player {name: $player})-[:BOWLING_PERFORMANCE]->(bp:BowlingPerformance)\n        RETURN sum(bp.wicketsTaken) AS total, count(bp) AS innings"
+  },
+  {
+    "question": "How many total wickets did CH Morris take across all IPL seasons in this dataset?",
+    "answer": "59 wickets in 42 innings",
+    "category": "career_stat",
+    "season": null,
+    "cypher": "MATCH (p:Player {name: $player})-[:BOWLING_PERFORMANCE]->(bp:BowlingPerformance)\n        RETURN sum(bp.wicketsTaken) AS total, count(bp) AS innings"
+  },
+  {
+    "question": "How many total wickets did R Ashwin take across all IPL seasons in this dataset?",
+    "answer": "58 wickets in 64 innings",
+    "category": "career_stat",
+    "season": null,
+    "cypher": "MATCH (p:Player {name: $player})-[:BOWLING_PERFORMANCE]->(bp:BowlingPerformance)\n        RETURN sum(bp.wicketsTaken) AS total, count(bp) AS innings"
+  },
+  {
+    "question": "How many total wickets did RA Jadeja take across all IPL seasons in this dataset?",
+    "answer": "56 wickets in 79 innings",
+    "category": "career_stat",
+    "season": null,
+    "cypher": "MATCH (p:Player {name: $player})-[:BOWLING_PERFORMANCE]->(bp:BowlingPerformance)\n        RETURN sum(bp.wicketsTaken) AS total, count(bp) AS innings"
+  }
+]
