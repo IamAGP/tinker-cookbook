@@ -150,11 +150,12 @@ Indexes affect speed only. They cannot leak answers to the model.
    whether these specific items were fixed is **unchecked**. Decide up front whether the
    reward targets the executed gold-SQL answer (BIRD-comparable) or the question's plain
    meaning. The graph above can reproduce either.
-3. **Agent safety on Community Edition.** No RBAC, and the instance currently has
-   `db.transaction.timeout = 0s` and `db.memory.transaction.max = 0B` (both unlimited)
-   **[local]**. Before any rollout: set a timeout and a memory cap (both dynamic settings
-   **[local]**), make the tool use read transactions only, and consider
-   `dbms.databases.default_to_read_only=true` after import **[local: present in neo4j.conf]**.
+3. **Agent safety on Community Edition.** No RBAC. Timeout and transaction memory cap were
+   unlimited (`0s` / `0B`) and are now set to `120s` / `2g` in `neo4j.conf` **[local, 2026-09-21]**.
+   Correction to an earlier draft: `SHOW SETTINGS` reports these as `isDynamic`, but changing
+   them at runtime needs `dbms.setConfigValue`, which is **Enterprise-only** **[doc]** — on
+   Community the config file plus a restart is the only path (and it persists, which is better).
+   Read-only still has to be enforced by the querying tool, since RBAC is Enterprise.
 4. **Cypher 25 is this instance's default language [local].** Gold Cypher must be written
    and verified in it; a base model's prior is mostly older Cypher.
 5. **49 questions is an eval set, not a training set.** Same trap as before: generated
