@@ -270,3 +270,38 @@ challenging (0/5 strict). n=5 challenging is too small to conclude anything alon
 at T=1.0 ⇒ ±~3.6 pp standard error on the overall number.
 **Open:** reconcile the $4.02 estimate against (a) console balance vs the $131.36 opening and
 (b) `get_billing_usage` filtered on this run's session metadata once the few-hour lag passes.
+
+## 2026-09-22 — E2 replicated on Fireworks: no framework effect; the noise floor is the finding
+
+The Fireworks session ran **this repo's harness unchanged** — importing `baseline_eval` and
+patching only the sampling client to a Fireworks serverless sampler of the same checkpoint
+(Qwen/Qwen3.8-27B). It refuses to start unless the harness blob equals `6390bc9`, which I
+verified is exactly `baseline_eval.py` at `ed9e7f7`. So prompt, renderer, tool, limits, scorer
+and output schema are identical byte for byte. Its files: `~/bird_rl_runs/e2fw_full_qwen3_8_27b/`.
+
+**Recomputed here from both results files (not taken from the report):**
+
+| | Tinker | Fireworks |
+|---|---|---|
+| strict | 0.608 | 0.608 |
+| lenient | 0.677 | 0.656 |
+
+Paired strict: both right 92 · both wrong 52 · **Tinker-only 21 · Fireworks-only 21** · McNemar
+exact p = 1.00 · agreement 0.774. Paired lenient: 18 vs 14, p = 0.60.
+Per-tier differences (simple .675/.636, moderate .367/.500, challenging 0/5 vs 2/5) are within
+single-sample noise at these n.
+
+**What this actually tells us:**
+1. **No detectable framework effect** — same model, same code, same score.
+2. **The noise floor is large: 42 of 186 questions (22.6%) flip between two single samples at
+   T=1.0.** Any RL gain measured with one sample per question must clear that. Checkpoint
+   comparisons need several samples per question and paired tests, not one-shot accuracy.
+3. **134/186 (72%) are solved in at least one of two samples** vs 0.608 for one sample. The 42
+   flippers are exactly where GRPO-style RL has signal (mixed outcomes within a group); the 52
+   never-solved are where it has none unless sampling finds a success.
+4. Pooled over 372 samples the baseline is 0.608 (SE ≈ 2.5 pp).
+
+**Cost:** Fireworks $3.12 (billed tokens equal the harness meter exactly; 47% of prompt tokens
+cached). Tinker $2.33 by console. The gap is most likely prefix-cache hit rate (my arithmetic
+implies roughly 75–78% cached on Tinker) — **unconfirmed**: Tinker billing usage for
+18:00–20:00 UTC had no sampling events yet when queried (documented lag of a few hours).
