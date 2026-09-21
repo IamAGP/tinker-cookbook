@@ -137,3 +137,46 @@ the config file and a restart. Upside: the change persists.
 Read-only is still unenforced at the server (RBAC is Enterprise); the query tool must use
 read transactions. Open: gold Cypher for the 186 questions · reward function ·
 training-question strategy · trainer/platform.
+
+## 2026-09-21 — how much structure do the 186 questions actually cover?
+
+Measured a structural signature per gold query (tables touched, aggregations, and presence of
+subquery / GROUP BY / HAVING / ORDER-BY-LIMIT / CASE / CAST / DISTINCT / LIKE / date / IS NULL):
+
+| metric | value |
+|---|---|
+| questions | 186 |
+| **distinct query structures** | **64** |
+| structures appearing exactly once | 42 |
+| tables touched per query | 1 → 57 · 2 → 116 · 3 → 13 (never more) |
+| queries with no aggregation at all | 90 |
+| most common single structure | 2 tables, no aggregation, no features (34 questions) |
+
+**Reading:** the benchmark exercises a thin slice of this graph — at most a 2–3 hop join, half
+the questions with no aggregation, and nothing that traverses `LINKS_TO` chains or paths like
+User→PostHistory→Post→Tag. Prior work on a different KG (cricket, 2026-07) found that domain
+saturating at ~124–140 distinct structures, so a single schema has roughly 2× headroom in
+structural space — **not** the order of magnitude that RL volume needs.
+**Implication:** "more questions" on one schema is the wrong axis; distinct *structures* is the
+axis, and one schema caps out. See the E2 preflight below.
+
+## 2026-09-21 — E2 preflight: zero-shot baseline (`baseline_eval.py`, written, NOT yet run)
+
+Scores model-returned rows against the execution-verified reference answers, so no gold Cypher
+is required. Tool is read-only: write-keyword rejection plus `execute_read`, since the server
+has no RBAC. Metrics per question: exact row-set match, value-set match, and reference-covered
+(looser). Reports by difficulty (151 simple / 30 moderate / 5 challenging).
+
+**Rule-7 preflight, answered before the machine exists:**
+1. *Timestamped progress per unit of work?* One line per completed question with elapsed seconds.
+2. *Results to disk incrementally?* One JSON line appended per question to `log_path`, not one
+   write at the end.
+3. *Does working memory grow?* Per-question transcripts are held only for the question in flight;
+   tool results are truncated to 4 KB before entering the conversation and rows capped at 50.
+   Bounded by `concurrency` (default 16), not by the question count.
+4. *If killed at 80%?* Every finished question survives in the JSONL; rerun skips them.
+
+**Cost shape:** 186 questions × up to 6 turns × 1024 max tokens, temperature 0. Billed by Tinker
+sampling; no GPU rental, no pod, so no idle watchdog is needed — the turn cap is the bound.
+**Not yet decided (blocking the run):** which model. Tinker currently lists 31 models; smaller
+candidates are Qwen3.5-4B, Qwen3.5-9B, Qwen3-8B, gpt-oss-20b, Qwen3.6-27B, Qwen3.8-27B.
