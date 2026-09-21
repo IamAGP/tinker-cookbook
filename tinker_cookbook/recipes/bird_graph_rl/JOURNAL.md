@@ -125,3 +125,15 @@ Q633 (351), Q639 (0.0), Q669 ('2010-08-13'). This retires the E0b caveat: my Cyp
 re-expressions of the gold logic were faithful.
 Outputs in object storage under `gold/`. Lambda, role, log group deleted and verified gone.
 Docs added: DATA_HANDOFF.md (public-safe), LOCAL_RESOURCES.md (gitignored).
+
+## 2026-09-21 — guardrails set (blocking item cleared)
+
+`db.transaction.timeout=120s`, `db.memory.transaction.max=2g` written to `neo4j.conf`;
+verified live as `2m` / `2.00GiB`; graph intact at 649,846 / 1,380,394 after restart.
+**Corrected claim:** I previously called these "dynamic settings" because `SHOW SETTINGS`
+reports `isDynamic: true`. The docs say runtime changes via `dbms.setConfigValue` are
+**Enterprise-only**, and the procedure does not exist on this build — so Community requires
+the config file and a restart. Upside: the change persists.
+Read-only is still unenforced at the server (RBAC is Enterprise); the query tool must use
+read transactions. Open: gold Cypher for the 186 questions · reward function ·
+training-question strategy · trainer/platform.

@@ -102,11 +102,13 @@ and share-alike apply to anything published.
 
 - Bolt `bolt://localhost:7687`, user `neo4j`, database `neo4j`; password in `LOCAL_RESOURCES.md`.
 - A Neo4j MCP server can be pointed at this instance (schema + read + write tools).
-- **Community Edition has no role-based access control, and the instance currently has no
-  query timeout and no transaction memory cap.** Before any automated rollouts: use
-  read-only transactions in the tool, set `db.transaction.timeout` and
-  `db.memory.transaction.max` (both dynamic), and consider
-  `dbms.databases.default_to_read_only=true`. A single runaway query can hang the instance.
+- **Guardrails are set** (2026-09-21): `db.transaction.timeout=120s` and
+  `db.memory.transaction.max=2g` in `neo4j.conf`. Community Edition **cannot** change these at
+  runtime — `dbms.setConfigValue` is Enterprise-only — so they live in the config file and a
+  restart is required. Generous on purpose: the slowest gold query runs ~15 s.
+- **There is still no role-based access control** (Enterprise only), so read-only must be
+  enforced by the querying tool itself — use read transactions, not write ones. Setting
+  `dbms.databases.default_to_read_only=true` is the stronger option but blocks schema changes.
 - One user database only (Community). Loading another graph replaces this one.
 
 ## 7. How to rebuild or restore
@@ -125,5 +127,5 @@ and share-alike apply to anything published.
 
 ## 8. Not done yet
 
-Gold Cypher for the 186 questions · agent safety settings · reward function · training-question
-strategy · choice of trainer/platform. Nothing in this folder is committed to git yet.
+Gold Cypher for the 186 questions · reward function · training-question strategy · choice of
+trainer/platform.
