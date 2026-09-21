@@ -180,3 +180,93 @@ has no RBAC. Metrics per question: exact row-set match, value-set match, and ref
 sampling; no GPU rental, no pod, so no idle watchdog is needed — the turn cap is the bound.
 **Not yet decided (blocking the run):** which model. Tinker currently lists 31 models; smaller
 candidates are Qwen3.5-4B, Qwen3.5-9B, Qwen3-8B, gpt-oss-20b, Qwen3.6-27B, Qwen3.8-27B.
+
+## 2026-09-21 — E2 opening balance (before any sampling)
+
+- **Opening balance: $131.36** (Tinker console → Billing → Balance, screenshot from the owner,
+  2026-09-21). A dedicated API key for this project lives in the repo `.env`.
+- The SDK has **no balance endpoint**; `get_billing_usage` returns hourly token counts only, no
+  dollars, lagging up to a few hours. Opening token snapshot for this org over the prior 14 days:
+  **0 sampling tokens, 0 training tokens**, storage only (6,560 GB-hours; ~19.7 GB stored now,
+  i.e. ~$2/month at $0.10/GB-month — old checkpoints, left untouched).
+- Prices for Qwen/Qwen3.8-27B (docs, 2026-09-21): prefill $1.86/M, cached prefill $0.372/M,
+  sample $5.595/M. An earlier estimate priced every token at the sample rate and overstated cost.
+- Cost is tracked three ways: live token meter in the harness (upper bound, prompt at uncached
+  rate), billing usage filtered by the run's session metadata (exact tokens, hours later),
+  and the console balance at the end.
+
+## 2026-09-21 — E2 harness rebuilt on upstream patterns; pre-run validation (free)
+
+The first draft copied its structure from the June-era cricket harness. Rebuilt against the
+**current upstream** code instead: `recipes/search_tool/offline_eval.py` (upstream's own offline
+tool-agent eval) uses the same building blocks, and `rl/rollout_runner.run_rollout` (added
+upstream 2026-07) is now the single rollout loop — `do_single_rollout` just delegates to it.
+Adopted from upstream: `run_rollout` with `RolloutLimits` (per-episode `max_sampled_tokens`
+as a cost guard), `recipe_user_metadata` session tagging, and **no client-side sampling
+timeouts** (repo CLAUDE.md pitfall 2).
+
+**Caught before spending:** the repo `.env` `NEO4J_URI` points at an old cloud host whose DNS
+no longer resolves. The harness now reads dedicated `BIRD_NEO4J_*` variables (local instance)
+and calls `verify_connectivity()` before any sampling.
+
+**Scorer validated offline (no Tinker calls):** known-correct Cypher for q640, q633, q639,
+q669 → all scored correct (incl. a `neo4j.time.Date` vs `'2010-08-13'` string); the known-wrong
+edit-history version of q640 (−1491) → scored 0; large-result q532 (4,430 rows vs a 200-row
+capped reference) → correct via count + containment.
+**Read-only verified at the server:** a write inside a read transaction is rejected with
+`Neo.ClientError.Statement.AccessMode`. The keyword check is a second layer and now strips string
+literals first (a title search for 'data set' was previously being blocked — my bug).
+
+**Run config (smoke, then full):** Qwen/Qwen3.8-27B, renderer = model_info default
+`qwen3_8_xhigh_reasoning`, temperature 1.0 (the RL sampling temperature, so this is the starting
+policy's expected reward; single sample ⇒ ±~3.7 pp SE at n=186), max 8 turns, 8,192 tokens per
+turn, 16,384 sampled tokens per question, 56K trajectory cap, concurrency 16.
+**Watchdog:** harness stops starting new questions once its upper-bound estimate crosses
+`budget_usd` (smoke: $5). Per-question worst case ≈ 16K sampled × $5.595/M + prompt ≈ $0.2.
+
+### E2 smoke result — 10 questions (all "simple"), Qwen3.8-27B, 2026-09-21 23:54
+
+strict 0.50 · lenient 0.60 · no_query 0 · mean 2.9 turns · mean 4,781 prompt + 1,132 sampled
+tokens · **upper-bound cost $0.15 total (~$0.015/question)**. 63 s wall clock.
+Every failure inspected — they are not all model errors:
+
+| q | cause | who is "wrong" |
+|---|---|---|
+| 534 | returned name **and** views; question asks for name | model (format) — lenient passes |
+| 532 | returned all 4,430 names `collect()`-ed into one list row | model (format) |
+| 531 | returned both users + reputations instead of just the higher one | model (reasoning) |
+| 533 | 5,146 vs 4,941: counted accesses *on* 2014-09-01; gold uses `date(x) > '2014-09-01'` — difference is exactly the 205 users who last accessed that day (verified) | ambiguous boundary |
+| 538 | returned the 12 non-null titles; gold returns 121 rows, 109 of them NULL (answers have no title) — verified 12 = non-null count | gold quirk; model arguably right |
+
+So strict execution accuracy is harsh on output **shape**, which is cheap to learn and a
+clean RL signal, and it also inherits gold quirks. Primary metric stays strict (BIRD-faithful);
+lenient is reported alongside. Rescoring later is possible without resampling because every
+`final_query` is stored and the graph is static.
+Full run launched: 186 questions, `budget_usd=15`.
+
+### E2 RESULT — full zero-shot baseline, Qwen/Qwen3.8-27B, 186 questions (2026-09-21 23:56–23:59)
+
+| tier | n | strict | lenient | turns |
+|---|---|---|---|---|
+| simple | 151 | 0.675 | 0.722 | 4.16 |
+| moderate | 30 | 0.367 | 0.467 | 4.77 |
+| challenging | 5 | 0.000 | 0.600 | 6.00 |
+| **ALL** | **186** | **0.608** | **0.677** | 4.31 |
+
+no_query 0 (the model always uses the tool) · 172 completed, 14 hit the 8-turn cap ·
+42 questions had ≥1 Cypher error along the way · 172 s wall clock at concurrency 16.
+**Tokens:** 1,532,175 prompt + 209,682 sampled → **upper-bound $4.02** (prompt priced uncached;
+true cost lower because repeated prefixes hit the prefill cache). Smoke run added $0.15.
+Budget stop never triggered.
+
+**73 failures by cause (automatic, from stored rows):**
+27 same row count but different values · 25 different row count · 13 right values in the wrong
+shape (extra columns) · 8 many rows collapsed into one (`collect()`).
+So ~21 of 73 (29%) are *shape* errors — the cheapest thing RL can fix; the other ~52 are
+semantic (wrong filter, boundary, join, aggregation — and some gold quirks, see smoke table).
+
+**Reading:** a strong 27B model already gets 61% zero-shot; the headroom is moderate (0.37) and
+challenging (0/5 strict). n=5 challenging is too small to conclude anything alone. Single sample
+at T=1.0 ⇒ ±~3.6 pp standard error on the overall number.
+**Open:** reconcile the $4.02 estimate against (a) console balance vs the $131.36 opening and
+(b) `get_billing_usage` filtered on this run's session metadata once the few-hour lag passes.
