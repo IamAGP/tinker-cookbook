@@ -163,6 +163,7 @@ class Structure:
     @property
     def aggregation(self) -> str:
         return {'detail':'none','top':'none','bottom':'none','argmax':'none',
+          'nth':'none','projection':'none','conditional_count':'count','conditional_sum':'sum',
           'distinct':'count distinct','entity_group':'count distinct','entity_having':'count distinct',
           'ratio':'count distinct','exists':'count distinct','negation':'count distinct',
           'year':'avg','null':'sum','not_null':'avg','contains':'count distinct','starts':'count distinct',
@@ -173,6 +174,8 @@ class Structure:
         return {'exists':('existence',),'negation':('existence','negation'),
           'ratio':('ratio/percentage',),'difference':('difference of two aggregates',),
           'comparison':('comparison between two named entities',),
+          'nth':('n-th ranked',),'projection':('DISTINCT projection',),
+          'conditional_count':('conditional aggregate',),'conditional_sum':('conditional aggregate',),
           'having':('HAVING-style post-filter',),'entity_having':('HAVING-style post-filter',)}.get(self.mode,())
 
     @property
@@ -185,12 +188,13 @@ class Structure:
                      'badge':'equality on name','date':'year/date range','range':'numeric range'}[self.anchor]
         if self.mode in ('named','comparison'): anchor_kind='equality on name'
         filters=[(self.anchor_label,anchor_kind)]
+        if self.mode in ('conditional_count','conditional_sum'): filters.append((self.label,'numeric range'))
         extra={'year':'year/date range','null':'IS NULL','not_null':'IS NOT NULL',
                'contains':'string CONTAINS','starts':'string STARTS WITH','label':'label test:Question'}.get(self.mode)
         if extra: filters.append((self.label,extra))
         target=self.path.labels[self.previous] if self.mode in ('entity_group','entity_having') else self.label
         grouping=self.label if self.mode in ('group','having','entity_group','entity_having') else 'none'
-        ordering={'detail':'order-by','group':'order-by','having':'order-by','entity_group':'order-by',
+        ordering={'nth':'n-th ranked','projection':'order-by','detail':'order-by','group':'order-by','having':'order-by','entity_group':'order-by',
                   'entity_having':'order-by','top':'top-k','bottom':'argmin','argmax':'argmax'}.get(self.mode,'none')
         return canonical_signature(self.path,filters,(self.aggregation,target),grouping,ordering,self.extras)
 
@@ -208,6 +212,9 @@ class Structure:
     def intent(self) -> str:
         description=self.description
         metric={'score':'score','reputation':'reputation','count':'stored tag usage count','viewCount':'view count'}.get(self.metric,self.metric)
+        if self.mode=='nth': return f'Which of {description} ranks at the requested position by {metric}?'
+        if self.mode=='projection': return f'List the distinct names or titles of {description}.'
+        if self.mode in ('conditional_count','conditional_sum'): return f'What is the '+('number' if self.mode=='conditional_count' else 'total '+metric)+f' of {description} whose {metric} reaches a specified threshold?'
         if self.mode in ('entity_group','entity_having'):
             subject=PROPERTIES[self.path.labels[self.previous]][3]
             return f'List {description} and the number of distinct associated {subject}s'+(' meeting a minimum count.' if self.mode=='entity_having' else '.')
@@ -243,12 +250,16 @@ class Structure:
         base=f'CYPHER 25 MATCH REPEATABLE ELEMENTS {self.path.pattern} WHERE {predicate} '
         display,column=self.display
         metric_column=self.sort_column
-        if self.mode in ('detail','top','bottom','argmax'):
+        if self.mode=='projection':
+            return base+f'RETURN DISTINCT {display} AS {column} ORDER BY {column}'
+        if self.mode in ('detail','top','bottom','argmax','nth'):
             base+=f'WITH DISTINCT {ident} AS identity, {display} AS {column}, {m} AS {metric_column} '
             if self.mode!='detail': base+=f'WHERE {metric_column} IS NOT NULL '
             base+=f'RETURN {column}, {metric_column} '
             if self.mode=='detail': return base+'ORDER BY identity'
             direction='ASC' if self.mode=='bottom' else 'DESC'
+            if self.mode=='nth':
+                return base+f'ORDER BY {metric_column} {direction}, identity ASC '+('LIMIT $probe_k' if probe else 'SKIP $skip LIMIT 1')
             return base+f'ORDER BY {metric_column} {direction}, identity ASC LIMIT '+('$probe_k' if probe else '$k')
         if self.mode in ('entity_group','entity_having'):
             previous=f'n{self.previous}.{PROPERTIES[self.path.labels[self.previous]][0]}'
@@ -259,6 +270,8 @@ class Structure:
             return base+f'WITH DISTINCT n0.displayName AS person, {ident} AS identity, {m} AS measurement RETURN sum(CASE WHEN person=$name THEN measurement ELSE 0 END)-sum(CASE WHEN person=$other_name THEN measurement ELSE 0 END) AS {self.metric}_difference'
         # Deduplicate entities BEFORE aggregation, never SUM(DISTINCT score).
         base+=f'WITH DISTINCT {ident} AS identity, {m} AS measurement '
+        if self.mode=='conditional_count': return base+f'RETURN sum(CASE WHEN measurement >= $condition THEN 1 ELSE 0 END) AS qualifying_{self.label.lower()}_count'
+        if self.mode=='conditional_sum': return base+f'RETURN sum(CASE WHEN measurement >= $condition THEN measurement ELSE 0 END) AS qualifying_total_{metric_column}'
         if self.mode=='ratio': return base+'RETURN CASE WHEN count(*)=0 THEN null ELSE 100.0*sum(CASE WHEN measurement>0 THEN 1 ELSE 0 END)/count(*) END AS positive_percentage'
         if self.aggregation=='count distinct': return base+f'RETURN count(*) AS {self.label.lower()}_count'
         alias={'sum':'total','avg':'average','min':'minimum','max':'maximum'}.get(self.aggregation,self.aggregation)+'_'+metric_column
@@ -311,6 +324,8 @@ def candidate_structures() -> list[Structure]:
         modes = ['detail','count','distinct','sum','avg','min','max','group','top','bottom','argmax']
         if path.hops == 0:
             modes = ['count','sum','avg','top','argmax']
+        if path.hops <= 1:
+            modes += ['nth','conditional_count','conditional_sum','projection']
         if path.hops >= 2:
             modes += ['ratio','difference','having','entity_group','entity_having']
         label = 'Post' if path.labels[-1] == 'Badge' else path.labels[-1]

@@ -27,7 +27,7 @@ def test_component_holdout_and_tags_are_exact():
     for hop in range(5):
         group=[s for s in structures if s.path.hops==hop]
         forced=[s for s in group if p.held_components['extra'] in s.extras or canonical_path(s.path)==p.held_components['four_hop_path'] or json.dumps([json.loads(s.signature)['aggregation'],s.extras])==p.held_components['aggregation_extras_pairing']]
-        assert sum(p.assignments[s.structure_id]=='heldout_structure' for s in group)==max(round(len(group)*.2),len(forced))
+        assert sum(p.assignments[s.structure_id]=='heldout_structure' for s in group)>=max(round(len(group)*.2),len(forced))
 
 
 def test_instance_holdout_is_disjoint_reproducible():
@@ -36,3 +36,18 @@ def test_instance_holdout_is_disjoint_reproducible():
     assert a==split_instances(list(reversed(ids)),'train',7)
     assert list(a.values()).count('heldout_instance')==2
     assert set(split_instances(ids,'heldout_structure',7).values())=={'heldout_structure'}
+
+
+def test_c2_actual_instance_mix_and_floor():
+    from .split import training_count
+    ss=enumerate_structures()
+    counts={s.structure_id:6+(j%7) for j,s in enumerate(ss)}
+    counts[ss[0].structure_id]=5
+    p=plan_split(ss,42,counts)
+    training=[s for s in ss if p.assignments[s.structure_id]=='train']
+    total=sum(training_count(counts[s.structure_id]) for s in training)
+    assert 2*sum(training_count(counts[s.structure_id]) for s in training if s.path.hops<=1)>=total
+    assert 100*sum(training_count(counts[s.structure_id]) for s in training if s.path.hops>=3)<=15*total
+    assert all(6<=training_count(counts[s.structure_id])<=12 for s in training)
+    assert p.assignments[ss[0].structure_id]=='heldout_structure'
+    assert sum(v=='heldout_instance' for v in split_instances([str(i) for i in range(6)],'train',42).values())==0

@@ -12,6 +12,7 @@ from datetime import datetime
 
 import chz
 import tinker
+from dotenv import load_dotenv
 
 from tinker_cookbook import cli_utils
 from tinker_cookbook.recipes.bird_graph_rl.rl_env import GraphQADatasetBuilder
@@ -75,6 +76,10 @@ def _pin_lora_layers(train_unembed: bool) -> None:
 
 
 async def cli_main(cfg: CLIConfig) -> None:
+    # The project's API key and database settings live in the env file. Load it before any client
+    # exists, overriding the shell, so the run is billed to the project's key and not to whichever
+    # key the shell happens to export. The evaluation harness does the same.
+    load_dotenv(cfg.env_file, override=True)
     _pin_lora_layers(cfg.train_unembed)
     builder = GraphQADatasetBuilder(
         instances_path=cfg.instances_path,

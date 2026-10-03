@@ -14,7 +14,12 @@ class SplitPlan:
     unseen_components: dict[str,list[str]]
 
 
-def plan_split(structures: list[Structure], seed: int) -> SplitPlan:
+def training_count(n: int) -> int:
+    return n-min(2,max(0,n-6))
+
+
+def plan_split(structures: list[Structure], seed: int,
+               instance_counts: dict[str,int] | None = None) -> SplitPlan:
     ordered = sorted(structures,key=lambda s:s.structure_id)
     rng = random.Random(seed)
     rng.shuffle(ordered)
@@ -42,6 +47,38 @@ def plan_split(structures: list[Structure], seed: int) -> SplitPlan:
         need = max(0,round(len(group)*.2)-sum(s.structure_id in held for s in group))
         candidates = [s for s in group if s.structure_id not in held]
         held.update(s.structure_id for s in candidates[:need])
+    counts=instance_counts or {s.structure_id:12 for s in ordered}
+    held.update(s.structure_id for s in ordered if counts.get(s.structure_id,0)<6)
+    eligible=[s for s in ordered if s.structure_id not in held]
+    shallow=[s for s in eligible if s.path.hops<=1]
+    middle=[s for s in eligible if s.path.hops==2]
+    deep=[s for s in eligible if s.path.hops>=3]
+    shallow_n=sum(training_count(counts[s.structure_id]) for s in shallow)
+    retained={s.structure_id for s in shallow}
+    middle_n=0
+    for s in middle:
+        n=training_count(counts[s.structure_id])
+        if 10*(middle_n+n)<=7*shallow_n:
+            retained.add(s.structure_id); middle_n+=n
+    # Cover as many deep patterns as capacity permits before repeating a pattern.
+    represented=set(); first=[]; remaining=[]
+    for s in deep:
+        key=canonical_path(s.path)
+        if key not in represented:
+            first.append(s); represented.add(key)
+        else: remaining.append(s)
+    deep_n=0
+    for s in first+remaining:
+        n=training_count(counts[s.structure_id])
+        if middle_n+deep_n+n<=shallow_n and 85*(deep_n+n)<=15*(shallow_n+middle_n):
+            retained.add(s.structure_id); deep_n+=n
+    # Fill remaining two-hop capacity without changing the deep share ceiling.
+    for s in middle:
+        if s.structure_id in retained: continue
+        n=training_count(counts[s.structure_id])
+        if middle_n+deep_n+n<=shallow_n:
+            retained.add(s.structure_id); middle_n+=n
+    held.update(s.structure_id for s in eligible if s.structure_id not in retained)
     assignments = {s.structure_id:'heldout_structure' if s.structure_id in held else 'train'
                    for s in ordered}
     training_components = frozenset(c for s in ordered if s.structure_id not in held for c in components(s))
@@ -60,5 +97,5 @@ def split_instances(instance_ids: list[str], structure_split: str, seed: int) ->
         return dict.fromkeys(instance_ids,'heldout_structure')
     ids = sorted(instance_ids)
     random.Random(seed).shuffle(ids)
-    n = min(2,max(0,len(ids)-2))
+    n = min(2,max(0,len(ids)-6))
     return {iid:'heldout_instance' if i < n else 'train' for i,iid in enumerate(ids)}

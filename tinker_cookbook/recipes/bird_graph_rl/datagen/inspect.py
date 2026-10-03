@@ -40,10 +40,13 @@ def main() -> None:
         else:
             assert {i['split'] for i in group} <= {'train','heldout_instance'}
             assert sum(i['split'] == 'heldout_instance' for i in group) <= 2
-            assert any(i['split'] == 'train' for i in group)
-    plan=plan_split([known[s['structure_id']] for s in structures],report['seed'])
+            assert 6<=sum(i['split']=='train' for i in group)<=12
+    plan=plan_split([known[s['structure_id']] for s in structures],report['seed'],dict(Counter(i['structure_id'] for i in instances)))
     assert {s['structure_id']:s['split'] for s in structures}==plan.assignments
     assert all(s['novelty']==plan.novelty.get(s['structure_id']) for s in structures)
+    training=[i for i in instances if i['split']=='train']
+    assert 2*sum(i['hops']<=1 for i in training)>=len(training)
+    assert 100*sum(i['hops']>=3 for i in training)<=15*len(training)
     rng = random.Random(report['seed'])
     sample = []
     for hops in sorted(strata):
@@ -79,10 +82,12 @@ def main() -> None:
             rows,runtime = graph.execute(i['cypher'],i['params'])
             assert canonical_rows(rows) == canonical_rows(i['rows']),i['instance_id']
             assert runtime <= 5000,i['instance_id']
-            if structure.mode in ('top','bottom','argmax'):
-                k = i['params']['k']
+            if structure.mode in ('top','bottom','argmax','nth'):
+                k = i['params']['rank'] if structure.mode=='nth' else i['params']['k']
                 probe,_ = graph.execute(structure.render(probe=True),dict(i['params'],probe_k=k+1))
                 assert len(probe) <= k or probe[k-1][structure.sort_column] != probe[k][structure.sort_column]
+                if structure.mode=='nth':
+                    assert len(probe)>=k and probe[k-2][structure.sort_column]!=probe[k-1][structure.sort_column]
             assert structure.path.labels[0]!='User' or all(i['params'][key] in names for key in ('name','other_name') if key in i['params'])
             checks.append({'instance_id':i['instance_id'],'hops':i['hops'],'mode':structure.mode,
                            'n_rows':len(rows),'runtime_ms':round(runtime,3),

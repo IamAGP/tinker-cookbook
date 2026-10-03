@@ -141,6 +141,13 @@ def parameter_sets(structure: Structure, pool: Rows, names: dict[JSONScalar,str]
         else:
             if not row.get('root_date'): continue
             params={'date':row['root_date']}
+        if structure.mode=='nth':
+            params['rank']=rng.choice([2,3,5])
+            params['skip']=int(params['rank'])-1
+        if structure.mode in ('conditional_count','conditional_sum'):
+            metrics=[r['metric'] for r in pool if isinstance(r['metric'],(int,float))]
+            if not metrics: continue
+            params['condition']=rng.choice(metrics)
         if structure.mode in ('top','bottom','argmax'):
             params['k'] = rng.choice([3,5,10]) if structure.mode == 'top' else 1
         if structure.mode in ('having','entity_having'):
@@ -203,14 +210,14 @@ def generate_structure(graph: ReadGraph, structure: Structure, params_list: list
         try:
             rows,runtime = graph.execute(cypher,params)
             reason = rejection(rows,runtime)
-            if reason is None and structure.mode in ('top','bottom','argmax'):
-                k = int(params['k'])
+            if reason is None and structure.mode in ('top','bottom','argmax','nth'):
+                k = int(params['rank']) if structure.mode=='nth' else int(params['k'])
                 probe,probe_ms = graph.execute(structure.render(probe=True),dict(params,probe_k=k+1))
                 if probe_ms > 5000:
                     reason = 'runtime_over_5s'
-                elif boundary_tie(probe,k,structure.sort_column):
+                elif boundary_tie(probe,k,structure.sort_column) or structure.mode=='nth' and k>1 and len(probe)>=k and probe[k-2][structure.sort_column]==probe[k-1][structure.sort_column]:
                     reason = 'cut_boundary_tie'
-                elif canonical_rows(rows) != canonical_rows(probe[:k]):
+                elif canonical_rows(rows) != canonical_rows(probe[k-1:k] if structure.mode=='nth' else probe[:k]):
                     reason = 'unstable_result'
         except Neo4jError as error:
             reason = 'runtime_over_5s' if 'TimedOut' in str(error.code) else 'execution_error'
@@ -317,7 +324,7 @@ def main() -> None:
             if (index+1)%10 == 0:
                 print(f'{index+1}/{len(all_structures)} structures attempted; '
                       f'{len(kept_structures)} retained; {len(instances)} instances',flush=True)
-    split_plan = plan_split(kept_structures,args.seed)
+    split_plan = plan_split(kept_structures,args.seed,dict(Counter(i.structure_id for i in instances)))
     assignments = split_plan.assignments
     for structure in kept_structures:
         group = [i for i in instances if i.structure_id == structure.structure_id]

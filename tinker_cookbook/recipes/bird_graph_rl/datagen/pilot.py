@@ -128,6 +128,7 @@ def main() -> None:
         field={'user_name':'display name','tag_name':'tag name','comment_text':'first 120 characters of comment text','answer_text':'first 120 characters of the answer body','post_text':'title, or the first 120 characters of the body when no title is recorded'}[s.display[1]]
         sentence=text['question']
         sentence=sentence.replace('names or titles',field+'s' if s.label in ('User','Tag') else field).replace('identifying names or text',field).replace('names or text',field+'s' if s.label in ('User','Tag') else field).replace('name or text',field)
+        sentence=sentence.replace('each user who have badges','each user who has badges').replace('once per user','once per named user')
         sentence=sentence.replace('Who or what','Which '+entity).replace('item',entity)
         text['question']=sentence
     assert len(q)==60 and len(used)==len(q)

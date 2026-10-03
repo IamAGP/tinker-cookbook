@@ -617,3 +617,44 @@ estimate from E3 token counts and list prices: 128 × $0.01454 = $1.86. E4b's `m
 from E4a's measured cost, not from the dataset size, with a stated dollar ceiling.
 **Not billed by time, so no idle watchdog; the watchdog is the step cap plus the monitor.**
 **Blocked on:** natural-language questions for the generated instances (Codex, in progress).
+
+### E4a RESULT — RL smoke run, Qwen3.5-9B, 2 updates × 8 groups × 8 rollouts (2026-10-03 11:07–11:10)
+
+Data: 34 pilot training questions (16 used), written by Codex under the amended spec, hints on
+33 of 34. Checkpoint `tinker://d1bd0f5c-…:train:0/sampler_weights/final`.
+Before launch I found `train.py` did not load the project env file, so the run would have been
+billed to whichever API key the shell exports — a different key from the project's. Fixed first.
+
+| measured | step 0 | step 1 |
+|---|---|---|
+| reward (mean partial credit, kept groups) | 0.363 | 0.355 |
+| strict-correct | 0.357 | 0.359 |
+| constant-reward groups dropped | 1 of 8 | 3 of 8 |
+| turns per rollout | 5.89 | 4.97 |
+| prompt tokens per rollout (summed over turns) | 10,261 | 8,214 |
+| sampled tokens per rollout | 1,768 | 1,560 |
+| wall time | 80.6 s | 91.5 s |
+| sampler-vs-trainer KL | 0.00024 | 0.00027 |
+
+**What it settles.**
+- *Is there a learning signal?* Yes. Of 16 groups, 9 have a reward spread of at least 0.82
+  (some rollouts fully right, some fully wrong) and 4 are constant and dropped (0.25). The worry
+  that the reward is binary on most failures does not bite here, because the same question is
+  often solved by some rollouts and missed by others.
+- *Datums per trajectory?* 102 datums for 96 trained trajectories = 1.062. Multi-turn trajectories
+  merge into one training sequence, so training tokens are near the low bound (about 2,300–2,900
+  per rollout), not one sequence per turn.
+- *Does the reasoning renderer break prefix extension?* No, by the same evidence, and the small
+  sampler-vs-trainer KL says the trainer sees what the sampler produced.
+- *Cost.* From logged tokens at list prices, prompt priced uncached: $0.79 per 64-rollout step,
+  $1.58 per 128-rollout step, $1.58 for this smoke run. An estimate until billing data arrives.
+- *Generated questions are longer work than the evaluation ones:* 9,238 prompt and 1,664 sampled
+  tokens per rollout against 5,322 and 937 on the 186, with 5.43 turns against 3.88.
+- 4-hop questions: 0 of 8 strictly correct in step 0 (partial credit 0.012) — the hardest slice.
+**Not settled:** whether reward rises over more updates (two steps cannot show it); the exact
+bill; and LoRA alpha (the checkpoint exists now, so it can be read from the exported adapter).
+
+**Sizing E4b from these numbers.** 30 steps of 16 groups × 8 rollouts is an estimated $47.26 and
+needs 480 distinct training questions; 40 steps is $63.02 and 640. Codex is writing them now.
+Meanwhile three more zero-shot passes of the 9B on the 186 are running, to give the four-sample
+baseline that the pre-registered bar is defined on.

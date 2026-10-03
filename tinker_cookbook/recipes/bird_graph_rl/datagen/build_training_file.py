@@ -43,7 +43,8 @@ def main(cfg: Config) -> None:
             rows = [list(r.values()) if isinstance(r, dict) else list(r) for r in inst["rows"]]
             f.write(json.dumps({
                 "instance_id": inst["instance_id"], "question": q["question"].strip(),
-                "hint": (q.get("hint") or "").strip(), "rows": rows, "n_rows": inst["n_rows"],
+                # Hints are generated per instance; a questions file may override one.
+                "hint": (q.get("hint") or inst.get("hint") or "").strip(), "rows": rows, "n_rows": inst["n_rows"],
                 "structure_id": inst["structure_id"], "hops": inst["hops"], "split": inst["split"],
             }, default=str) + "\n")
             kept[inst["split"]] += 1
