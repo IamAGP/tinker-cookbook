@@ -894,3 +894,35 @@ The forgetting guard is met: the simple tier rose (0.477 → 0.525).
 Under pre-registration addendum 3 this stands as the milestone-1 result. Any further run is a
 separate, labelled result, and any change to the data must be justified by evidence that is not
 the 186. Upper-bound cost of the four passes: $3.95.
+
+### E8 RESULT — unseen query structures, read by hop as pre-registered (2026-10-03)
+
+360 generated questions on structures never trained, one sample each.
+
+| | n | base | trained (step 37) | change, 95% paired bootstrap |
+|---|---|---|---|---|
+| all unseen structures | 360 | 0.294 | 0.447 | +0.153 [+0.094, +0.211] |
+| novel combination | 151 | 0.285 | 0.470 | +0.185 [+0.099, +0.272] |
+| novel component | 209 | 0.301 | 0.431 | +0.129 [+0.053, +0.206] |
+
+By hop, unseen structures beside seen structures (held-out instances):
+
+| hops | unseen: n, base → trained, change | seen: n, base → trained, change |
+|---|---|---|
+| 0 | 16, 0.625 → 0.688, +0.062 [−0.125, +0.250] | 33, 0.939 → 0.970, +0.030 |
+| 1 | 19, 0.421 → 0.789, +0.368 [+0.105, +0.632] | 100, 0.480 → 0.700, +0.220 [+0.100, +0.340] |
+| **2** | **109, 0.422 → 0.514, +0.092 [−0.009, +0.193]** | **93, 0.505 → 0.656, +0.151 [+0.043, +0.258]** |
+| 3 | 92, 0.250 → 0.457, +0.207 [+0.098, +0.315] | 14, 0.286 → 0.357 (descriptive) |
+| 4 | 124, 0.153 → 0.298, +0.145 [+0.048, +0.242] | 24, 0.125 → 0.458 (descriptive) |
+
+**The pre-registered novelty claim (two hops).** On seen structures the gain is clear
+(+0.151, interval above zero). On unseen structures at the same depth it is +0.092 with an
+interval that reaches just below zero, and within that, novel combinations gain +0.156
+[−0.022, +0.333] and novel components +0.047 [−0.078, +0.172]. The ordering matches the earlier
+graph project (recombining trained parts transfers better than a part never seen), but **at two
+hops neither interval excludes zero, so this run does not establish it**. What the aggregate does
+show is that training on 135 structures did not merely memorise them: accuracy on 296-structure
+unseen data rose by 0.153 overall, and the rise appears at every depth.
+Upper-bound cost of the two passes: $6.88. Estimated balance after all of today's work: $67.09
+of the $128 opening figure (training $35.09, evaluation $23.01, smoke $2.81), still unconfirmed
+by any bill.
