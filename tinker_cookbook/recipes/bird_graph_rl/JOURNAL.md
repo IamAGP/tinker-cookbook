@@ -978,3 +978,21 @@ second run fixing only the question mix would leave a reward problem in place is
 this evidence a change to the reward is aimed at the wrong thing, and a change to the question
 mix at the right one. The shares on generated sets are single-sample point estimates and are to
 be quoted as approximate; the direction is not in doubt, since both lenient intervals exclude zero.
+
+## 2026-10-03 — balance reconciled against the console
+
+The owner read the console after all runs: **$83.04**. Opening figure before the runs: $128
+(his statement; he is not certain of the exact value, and $129.03 was the console reading on
+2026-09-22). **Actual spend: $44.96** (or $45.99). My running estimate was $60.91.
+Recomputed from every run folder since the opening: 38,096,750 prompt tokens, 7,927,081 sampled,
+13,635,401 trained under the one-datum-per-turn model. At list prices: $60.91 if no prompt token
+was cached, $40.79 if all were. The bill sits between the two and implies roughly 0.79 of prompt
+tokens were cache hits — the same range inferred from the 27B baseline in September.
+**What this confirms and what it does not.** It confirms that the estimates were upper bounds
+and conservative by about a quarter, so extending to stage 2 without the bill did not overspend.
+It is consistent with the per-turn training model. It does not by itself distinguish that model
+from the withdrawn alternatives, because the cache share is a free parameter; the billed
+training-token count from the usage API would, and that API has still returned no token rows.
+**Checkpoint retention (from the console):** periodic checkpoints expire in 7 days; `final` ones
+never. The selected checkpoint is a `final` and is kept; steps 10 and 30 will expire around
+2026-10-10, before the write-up deadline. Their held-out evaluations are already stored.
