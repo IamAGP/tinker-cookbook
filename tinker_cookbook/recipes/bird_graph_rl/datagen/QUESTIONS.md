@@ -38,3 +38,86 @@ Computed from structures.jsonl and instances.jsonl: 594 instances belong to 53 n
 ## Held-out sample conflict resolved by owner
 
 Applied the frozen sample cap per novel-component structure and one instance per selected novel combination. Current counts and ids are in heldout_structure_sample.json; the complete held-out question set is written. Frozen conditional-instance quality limits are documented in the current README and audit; no instance or split changed.
+
+## Literal scalar-equality audit and frozen aggregates — batch1
+
+{
+  "flagged_ids": [
+    "i_b01dff8c1a45cfb58f6b",
+    "i_0d7dd124befdd5de6309",
+    "i_a72932cb6e501e9bbbce"
+  ],
+  "count": 3
+}
+
+These aggregate answers happen to equal numeric filter parameters. The requested unconditional audit rejects them, but the explicit freeze forbids changing them in this targeted repair. They are retained as disclosed exceptions. Please confirm whether the broader rule should grandfather such aggregates or a later change should replace them.
+
+## Literal scalar-equality audit and frozen aggregates — batch2
+
+{
+  "flagged_ids": [
+    "i_4e8e8487db0d44adf93b",
+    "i_e6f65abe7a1bd1e9e187",
+    "i_048a356e7be989e10375",
+    "i_66a892f22d60f658c9ee",
+    "i_6b09f34b90c41096dcf3",
+    "i_b1b0ed3d469489680211",
+    "i_0e77b1272633d8ee6ff7",
+    "i_0e8f36f2fc48fd50a87c",
+    "i_fe21a3a6c2d06d731bf9"
+  ],
+  "count": 9
+}
+
+These aggregate answers happen to equal numeric filter parameters. The requested unconditional audit rejects them, but the explicit freeze forbids changing them in this targeted repair. They are retained as disclosed exceptions. Please confirm whether the broader rule should grandfather such aggregates or a later change should replace them.
+
+## Literal scalar-equality audit and frozen aggregates — batch2
+
+{
+  "flagged_ids": [
+    "i_4e8e8487db0d44adf93b",
+    "i_e6f65abe7a1bd1e9e187",
+    "i_048a356e7be989e10375",
+    "i_66a892f22d60f658c9ee",
+    "i_6b09f34b90c41096dcf3",
+    "i_b1b0ed3d469489680211",
+    "i_0e77b1272633d8ee6ff7",
+    "i_0e8f36f2fc48fd50a87c",
+    "i_fe21a3a6c2d06d731bf9"
+  ],
+  "count": 9
+}
+
+These aggregate answers happen to equal numeric filter parameters. The requested unconditional audit rejects them, but the explicit freeze forbids changing them in this targeted repair. They are retained as disclosed exceptions. Please confirm whether the broader rule should grandfather such aggregates or a later change should replace them.
+
+## Literal scalar-equality audit and frozen aggregates — batch1
+
+{
+  "flagged_ids": [
+    "i_b01dff8c1a45cfb58f6b",
+    "i_0d7dd124befdd5de6309",
+    "i_a72932cb6e501e9bbbce"
+  ],
+  "count": 3
+}
+
+These aggregate answers happen to equal numeric filter parameters. The requested unconditional audit rejects them, but the explicit freeze forbids changing them in this targeted repair. They are retained as disclosed exceptions. Please confirm whether the broader rule should grandfather such aggregates or a later change should replace them.
+
+## Literal scalar-equality audit and frozen aggregates — batch2
+
+{
+  "flagged_ids": [
+    "i_4e8e8487db0d44adf93b",
+    "i_e6f65abe7a1bd1e9e187",
+    "i_048a356e7be989e10375",
+    "i_66a892f22d60f658c9ee",
+    "i_6b09f34b90c41096dcf3",
+    "i_b1b0ed3d469489680211",
+    "i_0e77b1272633d8ee6ff7",
+    "i_0e8f36f2fc48fd50a87c",
+    "i_fe21a3a6c2d06d731bf9"
+  ],
+  "count": 9
+}
+
+These aggregate answers happen to equal numeric filter parameters. The requested unconditional audit rejects them, but the explicit freeze forbids changing them in this targeted repair. They are retained as disclosed exceptions. Please confirm whether the broader rule should grandfather such aggregates or a later change should replace them.

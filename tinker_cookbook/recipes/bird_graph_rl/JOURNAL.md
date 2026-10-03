@@ -1081,3 +1081,51 @@ confirmatory test (paired lenient difference on the 186, run 2 minus run 1):
 Any of the three is a separate billed run with its own preflight. A replication of run 1 on the
 other platform would also measure run-to-run variance (confounded with platform if the two
 disagree); it is not part of this rule because it is not yet runnable.
+
+### E9 preflight — run 2 (written before launch, 2026-10-03)
+
+**Opening balance: $83.03**, read from the Tinker console billing page at 15:08 (auto-reload is
+off, so the balance is a hard ceiling on spend).
+**What runs.** One detached pipeline: training (37 steps × 8 groups × 8 rollouts, `train.py`
+defaults, seed 0, checkpoints every 5 steps), then the pre-registered evaluations — step 37 on
+the 186 at four samples and on the 264 and 360 generated sets, step 30 on the two generated sets
+only. Same code path as run 1 except `TrainingCypherTool` (45 s limit), tested against the live
+graph today: a pathological query was stopped at 45.1 s and the database answered normally
+afterwards.
+**Rule-7 answers.**
+1. *Timestamped progress per unit of work?* One line per iteration in `metrics.jsonl` and the
+   console log; one line per question in each evaluation log; one line per stage in the pipeline
+   log; one monitor line every two minutes.
+2. *Results on disk incrementally?* Metrics and rollout summaries per iteration, checkpoints at
+   steps 5, 10, …, 35 and 37; evaluation results appended per question. The monitor plots the
+   curves (loss, reward, KL and the rest) and mirrors the run folder to object storage every two
+   minutes; evaluation folders are mirrored when they finish.
+3. *Does working memory grow?* No: rollouts are per iteration, at most 24 database connections,
+   rows capped per query.
+4. *If killed at 80%?* The last checkpoint and every logged iteration survive locally and in
+   object storage; the pipeline resumes training from the last checkpoint if restarted. An
+   evaluation that dies leaves its completed questions on disk and resumes.
+**Cost bound.** Billed per token, no idle billing. Training is bounded by `max_steps=37` (run 1:
+$35.09 estimated at list prices); evaluations by their question counts and a $6 cap each (run 1's
+equivalents summed to $13.75 estimated). Total $48.84 at list prices, about $36.04 at the billing
+ratio measured on run 1 (0.738). If training fails the evaluations do not start.
+**Watchdog.** Not billed by time, so the step cap is the bound; the monitor and stage markers
+show progress, and a failure marker is written if training exits non-zero.
+
+**E9 data, frozen before launch (2026-10-03 15:55).** `train_320.jsonl`, sha256 `876d793e038d9867…`,
+320 questions over 157 structures (56 reused from the first set, 101 new), hints on 291. Built
+by Codex under amendment D; snapshot mirrored to object storage (`datagen_v4/`).
+- *Checked independently by the training side* (`datagen/verify_v4.py`): no training structure
+  equals a held-out signature or uses a held-out component; no instance or query shared with a
+  held-out set; no question text shared with a held-out set; all 320 stored answers reproduced
+  from the live graph; of 56 plain-count queries none differs from a distinct count; at most 5
+  questions per structure. 20 instances also appear in run 1's training file.
+- *Mix, from the generator's own shape tags (not re-derived from the queries):* no aggregation
+  55.0%, "how many" 27.8% (count 25.0 + count distinct 2.8), sum / avg / min / max 9.7%, more than
+  one aggregate 7.5%; no ordering 83.1%; ≤1 hop 70%, 2 hops 20%, 3–4 hops 10%. Negation 0%: its
+  component is held out, a declared shortfall.
+- *Two flaws found on reading and fixed before freezing:* 16 lookups whose answer was stated in
+  the question (replaced by lookups returning a different attribute) and 14 ranges with equal
+  bounds worded as ranges (reworded). The run uses 296 of the 320 (37 steps × 8, shuffle seed 0).
+- A second batch of 280 with the same mix exists for the pre-registered extension (amendment D2);
+  it is not used by this run and has not yet been checked by the training side.
