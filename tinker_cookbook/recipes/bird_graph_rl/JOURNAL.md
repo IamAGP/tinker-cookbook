@@ -779,3 +779,27 @@ check, because the estimate prices prompts uncached and training at one datum pe
 bill should not exceed it, and `max_steps` bounds the spend either way. Estimated balance before
 stage 2: $95.30 ($128 opening less $32.70 estimated). Stage 2 is 17 more steps to step 37 — the
 end of the same 300-question file, so no question repeats — estimated $17.82.
+
+## 2026-10-03 — review of stage 1 by the Fireworks agent: corroboration, the timeout, unpriced costs
+
+- **Reproduced** from the three run folders: 0.504 / 0.534 / 0.602 and both paired intervals.
+- **Corroboration independent of the scorer** (her measurement, ledger): from base to step 10 to
+  step 20, rollouts cut off by the turn cap fall 82 → 74 → 59, mean turns 4.60 → 4.36 → 4.19,
+  query errors 229 → 215 → 206, while sampled tokens per question stay flat (1,374 to 1,400). The
+  policy reaches an answer in fewer turns with fewer failed queries; it is not thinking longer.
+- **Limits she states and I accept:** one sample per question; the held-out instances share
+  structures with training; "still rising" (step 20 − step 10) rests on a lower bound of +0.004.
+- **The database timeout is bimodal** (her analysis of `timing_spans.jsonl`): of 6,424 calls in
+  stage 1, 6,375 finish under 1 s, the slowest success is 23.8 s, nothing falls between 30 and
+  119 s, and 9 run to the 120 s timeout. The six slow steps account for 37.2% of wall time.
+  **Decision for the next run, not this one:** a 45 s per-query limit in training, set as the
+  transaction timeout so the model sees the same error text, pinned in `rl_env.py` and declared;
+  the evaluation harness stays at 120 s because every baseline was measured there. 45 s is above
+  every successful call in both the generated and the benchmark replay.
+- **Unpriced items in my extension reasoning.** The held-out evaluations ($5.76) were in my
+  balance estimate. Checkpoint storage was not: measured today, 26 checkpoints totalling
+  30.84 GB, of which 14 created today total 9.69 GB — $0.97 per month for today's at $0.10 per
+  GB-month (price read from the docs on 2026-09-21, not re-read today). Not a budget risk.
+- **No bill has yet confirmed any token accounting.** The console balance against the $128
+  opening figure is the single number that validates or breaks every estimate; to be asked of
+  the owner on his return.
