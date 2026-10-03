@@ -171,3 +171,14 @@ references minus one), an upper bound on graph hops.
   (`ORDER BY … SKIP n LIMIT 1`), conditional aggregates (counting or summing under a condition
   inside one query), and a DISTINCT projection as opposed to `count(DISTINCT …)`. A `LIMIT`
   without an order stays excluded: it is non-deterministic.
+
+## Notes on amendment C2 as realised (2026-10-03, from the Fireworks agent's join of the files)
+- The floor and cap in C2 are met approximately, not to the letter, and are to be read as "about":
+  on the 600 training questions 0.493 are at ≤1 hop (floor 0.50) and 0.158 at 3–4 hops (cap 0.15);
+  on the 300-question file the first run reads, 0.500 and 0.160. The run itself drew 0.506 and
+  0.175 over its first 160 groups. The data is not regenerated for a difference of a few questions.
+- "Between 6 and 12 instances per training structure" binds **instances**, not questions. Questions
+  per training structure are 4–5 in the 600 and 2–3 in the 300-question file.
+- **Consequence of moving deep structures to held-out:** the held-out-structure question set is far
+  deeper than training (0.600 at 3–4 hops against 0.158), so any comparison of seen and unseen
+  structures must be made at matched hop count.

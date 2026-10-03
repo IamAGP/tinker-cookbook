@@ -803,3 +803,20 @@ end of the same 300-question file, so no question repeats — estimated $17.82.
 - **No bill has yet confirmed any token accounting.** The console balance against the $128
   opening figure is the single number that validates or breaks every estimate; to be asked of
   the owner on his return.
+
+**Pre-registration addendum 2, written before any held-out-structure evaluation (2026-10-03).**
+The held-out-structure questions are much deeper than the training and held-out-instance ones
+(share at 3–4 hops: 0.600 against 0.158 and 0.144, recomputed from the question file), a direct
+consequence of moving deep structures out of training. A raw drop from held-out instances to
+held-out structures would therefore be mostly a depth effect and would overstate the cost of
+novelty. So: (1) held-out-structure results are reported **by hop**, beside held-out-instance
+results at the same hop; (2) **the novelty claim rests on the two-hop comparison only** — 109
+unseen-structure questions against 93 seen-structure ones; (3) results at 3 and 4 hops are
+descriptive, because the seen-structure side there has 14 and 24 questions; (4) novel-combination
+and novel-component are reported separately within that. Found by the Fireworks agent's join of
+the data files; the confound comes from a choice both of us made.
+**Known mismatches with human-written questions, recorded as limitations, not changed mid-run**
+(her measurement): sum, avg, min and max together are 48.7% of training questions against 12.2%
+of human asks in BIRD's training split, and plain lookups are under-represented (31.7% against
+54.6%); 15.3% of training questions ask for an ordering with no limit, which the order-insensitive
+scorer cannot reward or test, so nothing may be claimed about learning to order results.
