@@ -551,3 +551,20 @@ tuned toward this measurement. A training set that is 15% shallow against human 
 79% shallow is a mismatch large enough to matter for a milestone judged on human-written
 questions, so amendment C2 weights *instances* toward shallow structures while keeping every
 deep structure for the held-out analysis. The source is an independent human set, not the 186.
+
+## 2026-10-03 — C2 revised: it is a target, its numbers were stale, and it had a hidden cost
+
+Three corrections from the Fireworks agent, each verified from the files on disk:
+- **Stale figures in binding text.** I quoted the first output as 15.0% shallow and 52.0% deep;
+  those came from an interim report read earlier. From the files: 853 of 5,590 = 0.153 at ≤1 hop,
+  2,925 of 5,590 = 0.523 at 3–4 hops. Spec corrected.
+- **It is a target, not a check**, and is now declared as one in `PLAN.md`: the depth mix follows
+  BIRD's training split, so the post may not say the data was designed without reference to the
+  benchmark.
+- **Hidden cost.** The training split has 58 structures at ≤1 hop; at 12 instances each that is
+  696 shallow instances, so a floor of half caps the training set at 1,392; the 15% deep cap is
+  then 209 instances over 197 deep training structures, 1.06 each — "retained" in name only.
+  Resolution: every training structure gets 6–12 instances; only as many deep structures as that
+  allows stay in training (at most 34 at six each on the first output's counts); the rest move to
+  the held-out split. The earlier ≥1,500-instance target is dropped. Budget, not data volume, is
+  the binding limit on training length.

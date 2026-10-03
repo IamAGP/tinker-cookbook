@@ -17,8 +17,8 @@ from dotenv import dotenv_values
 from neo4j import Driver, GraphDatabase, READ_ACCESS
 from neo4j.exceptions import Neo4jError
 
-from .split import split_instances, split_structures
-from .structures import JSONScalar, PROPERTIES, Path as QueryPath, Structure, enumerate_structures
+from .split import split_instances, plan_split
+from .structures import JSONScalar, PROPERTIES, Path as QueryPath, Structure, enumerate_structures, candidate_structures, canonical_path
 
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parents[3]
@@ -56,7 +56,7 @@ class ReadGraph:
                     row: dict[str,JSONScalar] = {}
                     for key,value in record.items():
                         if value is not None and not isinstance(value,(str,int,float,bool)):
-                            raise TypeError(f'Unsupported scalar type: {type(value).__name__}')
+                            value = value.iso_format() if hasattr(value,'iso_format') else str(value)
                         if isinstance(value,float) and not math.isfinite(value):
                             raise ValueError('nonfinite result')
                         row[key] = value
@@ -71,7 +71,7 @@ class ReadGraph:
         first = QueryPath(path.labels,path.edges[:1]).pattern
         return self.execute(
             f'CYPHER 25 MATCH {first} RETURN DISTINCT n0.{key} AS anchor, '
-            f'n0.{metric} AS metric ORDER BY anchor',cap=None,timeout=30)[0]
+            f'n0.{metric} AS metric, '+('n0.displayName' if path.labels[0]=='User' else 'n0.tagName' if path.labels[0]=='Tag' else 'n0.title')+' AS root_name, '+('toString(date(n0.creationDate))' if path.labels[0]!='Tag' else 'null')+' AS root_date ORDER BY anchor',cap=None,timeout=30)[0]
 
     def names(self) -> Rows:
         return self.execute('CYPHER 25 MATCH (u:User) WITH u.displayName AS name, '
@@ -89,8 +89,8 @@ def rejection(rows: Rows, runtime_ms: float) -> str | None:
     return None
 
 
-def boundary_tie(rows: Rows, k: int) -> bool:
-    return len(rows) > k and rows[k-1]['value'] == rows[k]['value']
+def boundary_tie(rows: Rows, k: int, column: str = 'value') -> bool:
+    return len(rows) > k and rows[k-1][column] == rows[k][column]
 
 
 @dataclass
@@ -114,23 +114,36 @@ def parameter_sets(structure: Structure, pool: Rows, names: dict[JSONScalar,str]
     rng = random.Random(stable_seed(seed,structure.structure_id))
     candidates = list(pool)
     rng.shuffle(candidates)
-    if structure.mode in ('named','comparison'):
+    if structure.mode in ('named','comparison') or structure.anchor=='name' and structure.path.labels[0]=='User':
         candidates = [row for row in candidates if row['anchor'] in names]
     candidates = candidates[:max_attempts]
     other_names = sorted(names.values())
     result: list[Params] = []
     for row in candidates:
-        if structure.path.hops:
-            params: Params = {'anchor':row['anchor']}
-        else:
+        if structure.anchor=='range':
             metric = row['metric']
             if not isinstance(metric,(int,float)):
                 continue
             upper_values = sorted({r['metric'] for r in pool if isinstance(r['metric'],(int,float)) and r['metric'] >= metric})
-            params = {'lower':metric,'upper':rng.choice(upper_values)}
+            params: Params = {'lower':metric,'upper':rng.choice(upper_values)}
+        elif structure.anchor=='id':
+            params = {'anchor':row['anchor']}
+        elif structure.anchor=='name':
+            name=names.get(row['anchor']) if structure.path.labels[0]=='User' else row.get('root_name')
+            if not name: continue
+            params={'name':name}
+        elif structure.anchor=='title':
+            if not row.get('root_name'): continue
+            params={'title':row['root_name']}
+        elif structure.anchor=='badge':
+            if not row.get('root_name'): continue
+            params={'badge':row['root_name']}
+        else:
+            if not row.get('root_date'): continue
+            params={'date':row['root_date']}
         if structure.mode in ('top','bottom','argmax'):
             params['k'] = rng.choice([3,5,10]) if structure.mode == 'top' else 1
-        if structure.mode == 'having':
+        if structure.mode in ('having','entity_having'):
             params['threshold'] = rng.choice([1,2,3])
         if structure.mode == 'year':
             years = sorted(int(y) for y in str(row.get('years') or '').split('|') if y)
@@ -167,8 +180,8 @@ def enrich_texts(graph: ReadGraph, structure: Structure, pool: Rows) -> Rows:
     else:
         field, expression, output_key = text_key, f'left({end}.{text_key}, 4)', 'texts'
     rows,_ = graph.execute(f'CYPHER 25 MATCH {structure.path.pattern} '
-                           f'WHERE n0.{root_key} IN $anchors AND {end}.{field} IS NOT NULL '
-                           f'RETURN DISTINCT n0.{root_key} AS anchor, {expression} AS text '
+                           f"WHERE {'n2.name' if structure.anchor=='badge' else 'n0.'+root_key} IN $anchors AND {end}.{field} IS NOT NULL "
+                           f"RETURN DISTINCT {'n2.name' if structure.anchor=='badge' else 'n0.'+root_key} AS anchor, {expression} AS text "
                            'ORDER BY anchor, text LIMIT 5000',
                            {'anchors':[r['anchor'] for r in pool]},cap=None)
     by_anchor: dict[JSONScalar,list[str]] = {}
@@ -183,7 +196,7 @@ def generate_structure(graph: ReadGraph, structure: Structure, params_list: list
     answers: set[str] = set()
     n_valid = 0
     for params in params_list:
-        if any(str(params[key]) not in names for key in ('name','other_name') if key in params):
+        if structure.path.labels[0]=='User' and any(str(params[key]) not in names for key in ('name','other_name') if key in params):
             rejects['ambiguous_name'] += 1
             continue
         cypher = structure.render()
@@ -195,7 +208,7 @@ def generate_structure(graph: ReadGraph, structure: Structure, params_list: list
                 probe,probe_ms = graph.execute(structure.render(probe=True),dict(params,probe_k=k+1))
                 if probe_ms > 5000:
                     reason = 'runtime_over_5s'
-                elif boundary_tie(probe,k):
+                elif boundary_tie(probe,k,structure.sort_column):
                     reason = 'cut_boundary_tie'
                 elif canonical_rows(rows) != canonical_rows(probe[:k]):
                     reason = 'unstable_result'
@@ -234,6 +247,15 @@ def write_jsonl(path: Path, records: list[dict[str, object]]) -> None:
                             for row in records))
 
 
+def naturalness_report() -> dict[str,object]:
+    from .naturalness import decide
+    removed=[s for s in candidate_structures() if not decide(s.mode).keep]
+    return {'removed_structures':len(removed),
+            'by_path':dict(Counter(canonical_path(s.path) for s in removed)),
+            'by_aggregation':dict(Counter(s.aggregation for s in removed)),
+            'by_extras':dict(Counter(e for s in removed for e in s.extras))}
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--seed',type=int,default=20261003)
@@ -248,6 +270,9 @@ def main() -> None:
     LOGGER.addHandler(handler)
     LOGGER.setLevel(logging.DEBUG)
     LOGGER.propagate = False
+    if (out/'pilot_questions.jsonl').exists():
+        (out/'pilot_questions.pre_amendment.jsonl').write_text((out/'pilot_questions.jsonl').read_text())
+        (out/'pilot_questions.jsonl').unlink()
     config = dotenv_values(REPO/'.env')
     all_structures = enumerate_structures()
     if args.limit_structures:
@@ -264,9 +289,9 @@ def main() -> None:
         names = {row['anchor']:str(row['name']) for row in graph.names()}
         pools: dict[str,Rows] = {}
         for index,structure in enumerate(all_structures):
-            pool_key = structure.path.pattern
+            pool_key = structure.path.pattern+('::badge' if structure.anchor=='badge' else '')
             if pool_key not in pools:
-                pool = graph.root_pool(structure.path)
+                pool = graph.execute('CYPHER 25 MATCH (b:Badge) RETURN b.name AS anchor, b.name AS root_name, 0 AS metric ORDER BY anchor',cap=None)[0] if structure.anchor=='badge' else graph.root_pool(structure.path)
                 random.Random(stable_seed(args.seed,pool_key)).shuffle(pool)
                 pools[pool_key] = pool[:args.attempts*3]
             pool = pools[pool_key]
@@ -292,7 +317,8 @@ def main() -> None:
             if (index+1)%10 == 0:
                 print(f'{index+1}/{len(all_structures)} structures attempted; '
                       f'{len(kept_structures)} retained; {len(instances)} instances',flush=True)
-    assignments = split_structures(kept_structures,args.seed)
+    split_plan = plan_split(kept_structures,args.seed)
+    assignments = split_plan.assignments
     for structure in kept_structures:
         group = [i for i in instances if i.structure_id == structure.structure_id]
         splits = split_instances([i.instance_id for i in group],assignments[structure.structure_id],
@@ -302,7 +328,7 @@ def main() -> None:
     write_jsonl(out/'structures.jsonl',[
         {'structure_id':s.structure_id,'signature':s.signature,'hops':s.path.hops,
          'n_instances':sum(i.structure_id == s.structure_id for i in instances),
-         'split':assignments[s.structure_id]} for s in kept_structures])
+         'split':assignments[s.structure_id], 'intent':s.intent, 'anchor_kind':s.anchor, 'mode':s.mode, 'novelty':split_plan.novelty.get(s.structure_id), 'unseen_components':split_plan.unseen_components.get(s.structure_id,[])} for s in kept_structures])
     write_jsonl(out/'instances.jsonl',[i.record() for i in instances])
     structure_hops = Counter(str(s.path.hops) for s in kept_structures)
     report = {'seed':args.seed,'max_attempts_per_structure':args.attempts,
@@ -317,6 +343,14 @@ def main() -> None:
         'instances_by_split':dict(sorted(Counter(i.split for i in instances).items())),
         'structures_by_split':dict(sorted(Counter(assignments.values()).items())),
         'rejections':dict(rejected),'per_structure':per_structure,
+        'novelty_counts':dict(Counter(split_plan.novelty.values())),
+        'held_components':split_plan.held_components,
+        'naturalness_removals':naturalness_report(),
+        'anchor_instances':dict(Counter(next(s.anchor for s in kept_structures if s.structure_id==i.structure_id) for i in instances)),
+        'return_shapes':dict(Counter(str(len(i.rows[0]))+' columns' for i in instances)),
+        'numeric_id_anchor_share':sum('anchor' in i.params for i in instances)/max(1,len(instances)),
+        'single_column_share':sum(len(i.rows[0])==1 for i in instances)/max(1,len(instances)),
+        'single_value_alias_share':sum(list(i.rows[0])==['value'] for i in instances)/max(1,len(instances)),
         'comparison_semantics':'order-insensitive multiset with named columns',
         'targets_met':len(kept_structures)>=150 and len(instances)>=1500
           and sum(s.path.hops <= 1 for s in kept_structures)/max(1,len(kept_structures)) <= .35

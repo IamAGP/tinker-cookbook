@@ -71,7 +71,7 @@ def test_constant_structure_is_dropped_and_all_observations_counted():
 
 
 def test_ranges_are_sampled_from_observed_values():
-    s = Structure(Path(('User',)),'avg')
+    s = Structure(Path(('User',)),'avg','range')
     pool = [{'anchor':i,'metric':i*7} for i in range(10)]
     sampled = parameter_sets(s,pool,{},7,96)
     observed = {row['metric'] for row in pool}

@@ -1,3 +1,16 @@
+## Checkpoint (b)
+
+B3: every surviving candidate has an ordinary visitor intent; matched-combination
+counts and the contrived score-minus-absolute-score statistic are removed.
+Distinct entity groupings and thresholded groupings are separate replacement
+structures with distinct aggregation target labels. Exact removals by path,
+aggregation and extras are in `out/naturalness.json`. Filtering precedes split.
+
+B4 implementation now selects names, titles, badge names and creation dates
+for most anchors and returns names/text with scores or entity counts. All
+statistics deduplicate ENTITY identities before aggregation. Next: wire graph
+parameter sampling and semantic sort keys; regenerate and independently replay.
+
 # Amendment checkpoint
 
 A1–A3 implemented and unit-tested: uniform label granularity; canonical branches,

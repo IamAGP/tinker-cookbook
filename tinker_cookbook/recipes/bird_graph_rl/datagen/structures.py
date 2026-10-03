@@ -166,7 +166,7 @@ class Structure:
           'distinct':'count distinct','entity_group':'count distinct','entity_having':'count distinct',
           'ratio':'count distinct','exists':'count distinct','negation':'count distinct',
           'year':'avg','null':'sum','not_null':'avg','contains':'count distinct','starts':'count distinct',
-          'label':'count distinct','named':'sum','comparison':'sum'}.get(self.mode,self.mode)
+          'label':'count distinct','named':'sum','comparison':'sum','group':'count','having':'count','difference':'sum'}.get(self.mode,self.mode)
 
     @property
     def extras(self) -> tuple[str,...]:
@@ -200,7 +200,9 @@ class Structure:
 
     @property
     def description(self) -> str:
-        return DESCRIPTIONS[paths().index(self.path)]
+        description=DESCRIPTIONS[paths().index(self.path)]
+        if self.anchor!='badge': description=description.replace('holders of the selected badge','the selected users who have badges')
+        return description
 
     @property
     def intent(self) -> str:
@@ -328,10 +330,10 @@ def candidate_structures() -> list[Structure]:
         for mode in modes:
             if path.hops==0:
                 anchor='range'
-            elif path.labels[-1]=='Badge' or (len(path.labels)>2 and path.labels[2]=='Badge'):
-                anchor='badge'
             elif mode in ('named','comparison'):
                 anchor='name'
+            elif path.labels[-1]=='Badge' or (len(path.labels)>2 and path.labels[2]=='Badge'):
+                anchor='badge'
             else:
                 choice=int(hashlib.sha256((path.pattern+mode).encode()).hexdigest()[:8],16)%10
                 root=path.labels[0]

@@ -153,12 +153,20 @@ references minus one), an upper bound on graph hops.
 - **C1 corrects B4 on return shapes.** People ask for a single column 83.9% of the time and two
   columns 12.1%. A single-column answer is normal; do **not** widen returns for variety. What was
   wrong in the first output was the fixed alias, not the width. Keep semantically named columns.
-- **C2 Weight instances toward what people ask.** In that human set 21.4% of questions need 0
-  hops, 57.6% need 1, 16.8% need 2, 3.5% need 3 and 0.67% need 4 or more. The first output had
-  15.0% of its instances at ≤1 hop and 52.0% at 3–4 hops. Keep every structure that survives B3,
-  but allocate **instances** so that at least half of the training instances are at ≤1 hop and
-  3–4 hop instances are at most 15% of the training set. Deep structures remain essential for
-  the held-out-structure analysis; they should not dominate what the policy practises.
+- **C2 Depth mix is a target taken from that human set, and is declared as one.** In it 21.4% of
+  questions need 0 hops, 57.6% need 1, 16.8% need 2, 3.5% need 3 and 0.67% need 4 or more. The
+  first output, computed from its files, had 853 of 5,590 instances (0.153) at ≤1 hop and 2,925
+  (0.523) at 3–4 hops. Required of the **training** split:
+  - at least half of its instances are at ≤1 hop, and at most 15% are at 3–4 hops;
+  - **every training structure has between 6 and 12 instances.** Do not meet the floor by raising
+    the per-structure cap on shallow structures — a few structures practised many times is the
+    template-memorisation setup. Meet it by adding shallow structures (C3 adds several) or by
+    accepting a smaller training set;
+  - consequently only a limited number of deep structures can be in training. Choose them so the
+    shares above hold, and move **all other deep structures to the held-out split**, where A3's
+    tags still apply. A deep structure with one training instance is not "retained"; it is noise.
+  The training set will be smaller than the earlier 1,500 target; that is accepted. Report the
+  resulting counts by hop for each split.
 - **C3 Shapes people ask that the structure tuple should express:** the n-th ranked item
   (`ORDER BY … SKIP n LIMIT 1`), conditional aggregates (counting or summing under a condition
   inside one query), and a DISTINCT projection as opposed to `count(DISTINCT …)`. A `LIMIT`

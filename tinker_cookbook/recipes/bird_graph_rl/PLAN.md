@@ -14,7 +14,11 @@ re-implemented from prose. BIRD's 186 questions are evaluation only and are neve
 data generator. **Declared exception, and the line it draws:** properties of the *harness format* may inform
 training data (that prompts carry a hint, the tool, the caps); statistics about the *content* of
 the 186 may not. One such format statistic is used: 172 of the 186 evaluation prompts carry a
-hint (0.925), so about 92% of generated prompts do too. Nothing else from the 186 enters generation. Preflight, opening balance and a cost stop before anything billed. **Every number is computed with a
+hint (0.925), so about 92% of generated prompts do too. Nothing else from the 186 enters generation.
+**A second declared dependence, on BIRD's *training* split, not the 186:** the depth mix of the
+training data (share of shallow versus deep questions) is set from a measurement of 6,601
+human-written questions on 69 other databases. The post must say the depth mix follows BIRD's
+training split, not that the data was designed without reference to the benchmark. Preflight, opening balance and a cost stop before anything billed. **Every number is computed with a
 tool** — measured, or calculated by a script from stated inputs and labelled an estimate — never
 mental arithmetic or a predicted quantity, in messages between agents as much as in reports.
 
@@ -28,7 +32,7 @@ mental arithmetic or a predicted quantity, in messages between agents as much as
 ## Tasks
 | id | task | owner | due | done when |
 |---|---|---|---|---|
-| T1 | Training data, stage A: enumerate query structures, instantiate, execute, filter (`datagen/SPEC.md`) | Codex | Oct 4 | ≥150 structures, ≥1,500 verified instances, split by structure |
+| T1 | Training data, stage A: enumerate query structures, instantiate, execute, filter (`datagen/SPEC.md`) | Codex | Oct 4 | structures split by structure with the depth mix in `datagen/SPEC.md` C2; every training structure 6–12 instances |
 | T2 | Training data, stage B: natural-language question for each instance + ambiguity check | Codex + Tinker agent | Oct 5 | every instance has a question; 100 spot-checked |
 | T3 | Frontier reference on the 186 through the same harness | Tinker agent | Oct 4 | number + cost in journal |
 | T4 | RL environment + reward wired into the cookbook RL loop, hash-pinned | Tinker agent | Oct 5 | smoke run of 2 updates passes |
