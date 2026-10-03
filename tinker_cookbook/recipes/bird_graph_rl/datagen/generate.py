@@ -347,6 +347,7 @@ def main() -> None:
     write_jsonl(out/'structures.jsonl',[
         {'structure_id':s.structure_id,'signature':s.signature,'hops':s.path.hops,
          'n_instances':sum(i.structure_id == s.structure_id for i in instances),
+         'training_instances':sum(i.structure_id==s.structure_id and i.split=='train' for i in instances),
          'split':assignments[s.structure_id], 'intent':s.intent, 'anchor_kind':s.anchor, 'mode':s.mode, 'novelty':split_plan.novelty.get(s.structure_id), 'unseen_components':split_plan.unseen_components.get(s.structure_id,[])} for s in kept_structures])
     write_jsonl(out/'instances.jsonl',[i.record() for i in instances])
     structure_hops = Counter(str(s.path.hops) for s in kept_structures)
@@ -374,6 +375,17 @@ def main() -> None:
         'targets_met':len(kept_structures)>=150 and len(instances)>=1500
           and sum(s.path.hops <= 1 for s in kept_structures)/max(1,len(kept_structures)) <= .35
           and set(structure_hops) == {'0','1','2','3','4'}}
+    training=[i for i in instances if i.split=='train']
+    train_counts=Counter(i.structure_id for i in training)
+    report['instances_by_split_hop']={part:{str(h):sum(i.split==part and i.hops==h for i in instances) for h in range(5)} for part in ('train','heldout_instance','heldout_structure')}
+    report['structures_by_split_hop']={part:{str(h):sum(assignments[s.structure_id]==part and s.path.hops==h for s in kept_structures) for h in range(5)} for part in ('train','heldout_structure')}
+    report['c2']={'training_shallow_share':sum(i.hops<=1 for i in training)/max(1,len(training)),
+                  'training_deep_share':sum(i.hops>=3 for i in training)/max(1,len(training)),
+                  'training_structure_min':min(train_counts.values(),default=0),
+                  'training_structure_max':max(train_counts.values(),default=0)}
+    assert all(6<=n<=12 for n in train_counts.values())
+    assert 2*sum(i.hops<=1 for i in training)>=len(training)
+    assert 100*sum(i.hops>=3 for i in training)<=15*len(training)
     (out/'report.json').write_text(json.dumps(report,indent=2)+'\n')
     print(json.dumps({k:v for k,v in report.items() if k != 'per_structure'},indent=2),flush=True)
 

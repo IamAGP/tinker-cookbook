@@ -739,3 +739,43 @@ to object storage every two minutes. If it dies, `behavior_if_log_dir_exists=res
 from the last checkpoint.
 **To report afterwards (requested by the Fireworks agent):** which of the three baseline groups
 moved on the 186 — the 72 never solved, the 66 mixed, the 48 always solved.
+
+### E4b stage 1 RESULT — RL from base, Qwen3.5-9B, 20 steps (2026-10-03 11:23–11:57)
+
+1,280 rollouts on 160 generated questions (one pass, no question repeated). Checkpoints at steps
+5, 10, 15, 20: `tinker://46c8a099-6440-5f1e-8bf0-c865463ddbc2:train:0/sampler_weights/0000NN`.
+- **In-run reward shows no trend** (mean over all 64 rollouts: first five steps 0.528, last five
+  0.483) — but every step uses different questions, so this is not a measurement of learning.
+- 31.9% of groups were dropped as constant-reward (smoke: 25%).
+- Tokens: 9,172,357 prompt, 1,920,043 sampled, 7,576,241 trained. **Estimated cost $20.97** at
+  list prices (sampling $9.88, training $11.08), under the $28.08 bound: rollouts on this
+  training set are shorter than in the smoke run and more groups were dropped.
+- Wall time 34.2 minutes. Six of twenty steps exceeded 150 s because one rollout's query ran to
+  the 120 s database timeout while the other 63 rollouts waited (e.g. joining comments to users
+  by display name, which no index supports). On per-token billing this costs time only.
+- Sampler-vs-trainer KL stayed between 0.00011 and 0.00057.
+
+### E6 RESULT — checkpoint selection on generated held-out instances (264 questions, 1 sample each)
+
+| checkpoint | strict | lenient | turns | hops 0 / 1 / 2 / 3 / 4 |
+|---|---|---|---|---|
+| base | 0.504 | 0.606 | 4.60 | 0.939 / 0.480 / 0.505 / 0.286 / 0.125 |
+| step 10 | 0.534 | 0.610 | 4.36 | 0.970 / 0.580 / 0.441 / 0.214 / 0.292 |
+| step 20 | **0.602** | 0.667 | 4.19 | 0.879 / 0.660 / 0.548 / 0.357 / 0.333 |
+
+Paired over the same 264 questions: step 20 − base **+0.098**, 95% bootstrap [+0.034, +0.163]
+(better on 51, worse on 25); step 10 − base +0.030 [−0.038, +0.098]; step 20 − step 10 +0.068
+[+0.004, +0.136]. These are unseen parameter values of *trained* structures, generated data, one
+sample per question — evidence that training is working, not yet the milestone. Upper-bound cost
+of the three passes $5.76.
+
+**Decision: extend training (stage 2), and do not look at the 186 yet.** The pre-registration
+says the selected checkpoint is evaluated on the 186 once. Evaluating step 20 there now and a
+later checkpoint afterwards would be two looks, so the 186 waits until training has stopped.
+**A stated deviation.** I had said stage 2 would start only if the curve was rising *and* the
+smoke run's bill agreed with the estimate. The curve is rising. The bill is not available:
+the billing API returned no token rows for today at 06:36 UTC. I am extending without that
+check, because the estimate prices prompts uncached and training at one datum per turn, so the
+bill should not exceed it, and `max_steps` bounds the spend either way. Estimated balance before
+stage 2: $95.30 ($128 opening less $32.70 estimated). Stage 2 is 17 more steps to step 37 — the
+end of the same 300-question file, so no question repeats — estimated $17.82.

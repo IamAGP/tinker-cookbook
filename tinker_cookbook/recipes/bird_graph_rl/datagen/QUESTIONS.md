@@ -30,3 +30,11 @@
 ## Owner answers applied in amendments C
 
 Scalar answers need no width quota. Novelty is exact for the defined components. No artificial family is needed to preserve counts. B5 supersedes A5 and hints belong on instances. Runtime rejections remain nondeterministic. Independent review belongs to the team.
+
+## C2 rebalance creates a held-out question target conflict
+
+Computed from structures.jsonl and instances.jsonl: 594 instances belong to 53 novel-component structures. This alone exceeds the approximate 360 held-out-structure question target. I apply the stated priority: finish every novel-component instance before novel-combination questions, even if that exceeds the approximate total.
+
+## Held-out sample conflict resolved by owner
+
+Applied the frozen sample cap per novel-component structure and one instance per selected novel combination. Current counts and ids are in heldout_structure_sample.json; the complete held-out question set is written. Frozen conditional-instance quality limits are documented in the current README and audit; no instance or split changed.
