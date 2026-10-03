@@ -1154,3 +1154,71 @@ reproduced here with a cruder word-overlap test.
   "How many the". Gold answers are unaffected.
 - The hint rate can be cited from other databases (92.8% of 6,601 BIRD training questions carry
   a hint) rather than from the 186.
+
+### E9 RESULT — run 2, human-like question mix (2026-10-03, training 15:54–16:48, evaluations to 17:08)
+
+**Training.** 37 steps × 8 groups × 8 rollouts = 2,368 rollouts on 296 of the 320 questions, 53.5
+minutes, no errors. Checkpoints at 5, 10, …, 35 and final:
+`tinker://799ed3ff-f365-5705-abf4-94e9947e88c2:train:0/sampler_weights/{0000NN,final}`.
+33.8% of groups dropped as constant-reward (run 1: 36.1%). Sampler-versus-trainer KL about
+0.0003 or below throughout. Tokens: 15,242,596 prompt, 3,231,424 sampled, 13,185,064 trained.
+**Cost.** Estimated at list prices $35.80 training + $13.81 evaluations = $49.61. Console balance
+$83.03 before, **$45.78 after** (read 17:10): **$37.25 billed**, 0.751 of the list-price
+estimate (run 1's ratio: 0.738).
+
+**All comparisons below are from one script (`e9_analyze.py`, paired bootstrap over questions,
+10,000 resamples, seed 0), which reproduces milestone 1's point estimates exactly; its intervals
+differ from the earlier ledger rows in the third decimal (a different random generator), so run
+1 is restated here from the same script.**
+
+| the 186 human questions, 4 samples | strict | lenient |
+|---|---|---|
+| baseline | 0.4207 | 0.5739 |
+| run 1 (step 37) | 0.4664 | 0.5766 |
+| run 2 (step 37) | 0.4758 | 0.5524 |
+| run 1 − baseline | +0.0457 [+0.0094, +0.0833] | +0.0027 [−0.0296, +0.0350] |
+| run 2 − baseline | **+0.0551 [+0.0202, +0.0914]** | −0.0215 [−0.0497, +0.0067] |
+| run 2 − run 1 | +0.0094 [−0.0188, +0.0376] | **−0.0242 [−0.0538, +0.0040]** |
+
+| generated held-out, 1 sample | baseline | run 1 | run 2 | run 2 − baseline | run 2 − run 1 |
+|---|---|---|---|---|---|
+| 264 seen structures, strict | 0.5038 | 0.6780 | 0.6667 | +0.1629 [+0.0946, +0.2311] | −0.0114 [−0.0758, +0.0568] |
+| 264 seen structures, lenient | 0.6061 | 0.7083 | 0.6932 | +0.0871 [+0.0265, +0.1477] | −0.0152 [−0.0758, +0.0492] |
+| 360 unseen structures, strict | 0.2944 | 0.4472 | 0.4056 | +0.1111 [+0.0528, +0.1667] | −0.0417 [−0.0972, +0.0112] |
+| 360 unseen structures, lenient | 0.3611 | 0.4778 | 0.4500 | +0.0889 [+0.0278, +0.1472] | −0.0278 [−0.0861, +0.0306] |
+
+Step 30 of run 2, generated sets only (descriptive): 0.6061 strict on the 264, 0.3944 on the
+360 — below step 37 on both, so step 37 is not an anomalous update. Every pass scored all its
+questions; none was skipped for budget.
+
+**Read against the pre-registration.**
+1. *The bar (strict, run 2 against baseline): met.* +0.0551 with a lower bound of +0.0202; the
+   bar was a lower bound above zero and at least +0.05. 29.4% of the gap to the 27B reference
+   (0.608) is closed; run 1 closed 24.4% and missed the bar by 0.0043.
+2. *The confirmatory test (lenient, run 2 against run 1): not supported.* −0.0242, interval
+   including zero and lying mostly below it. The prediction was that a human-like mix would raise
+   accuracy in substance on human questions. It did not; lenient accuracy is, if anything, lower.
+3. *Run 2 against run 1, strict: not distinguishable* (+0.0094, interval spanning zero). That run
+   2 clears the bar and run 1 did not is therefore **not** evidence that the mix helped: the two
+   runs differ by less than their uncertainty, and with one run per arm seed variance is
+   unmeasured.
+4. *Generated sets:* run 2 is a little below run 1 on both, intervals including zero. Expected
+   in direction — those sets follow the old mix — and not counted against the hypothesis.
+
+**What the two runs agree on.** On human questions the strict gain is a gain in form: the share
+of questions with the right values in the wrong shape (lenient minus strict) falls from 0.1532
+at baseline to 0.1102 after run 1 and 0.0766 after run 2, while lenient accuracy does not rise in
+either. On generated questions both runs gain in substance as well (lenient +0.09 to +0.12).
+So RL here teaches this model to return what was asked for, everywhere, and to answer more
+questions correctly only on the distribution it trained on. The question-shape mix was not the
+reason substance fails to transfer.
+
+**What this does not show.** That the mix is irrelevant in general (one run per arm); that run 2
+is better or worse than run 1 on anything; why lenient accuracy leans down in run 2 (not
+examined yet).
+
+**Next, by the rule fixed in advance:** the result is the "run 2 not better" branch → 37 more
+steps of the run 1 arm on its unused training questions. Not launched; needs its own preflight
+and the owner's go-ahead on spending most of the remaining $45.78. The hints (82% of ours explain
+a term the question never uses, against 2.2% of human ones) are the named next suspect for the
+missing transfer of substance, and that rule's branch does not test them.
