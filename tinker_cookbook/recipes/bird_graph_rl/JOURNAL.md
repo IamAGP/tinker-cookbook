@@ -718,3 +718,24 @@ solved, 48 always solved. Upper-bound cost of the four passes $4.16.
 This is the "before" number the pre-registered bar is defined against. A gain needs a point
 estimate of at least 0.4707 after training with an interval on the paired difference above zero;
 the reference is 0.608 (single sample of the 27B on each platform).
+
+## 2026-10-03 — E4b stage 1 launched: RL from base, Qwen3.5-9B, 20 steps × 8 groups × 8 rollouts
+
+**Data.** Snapshot of Codex's amended, rebalanced output (431 structures, 4,982 instances; training
+split 1,331 instances with 0.50 at ≤1 hop and 0.15 at 3–4 hops) and her first 200 individually
+written training questions, covering 135 distinct structures. Training file `train_200.jsonl`
+built by `datagen/build_training_file.py`; snapshot mirrored to object storage. Stage 1 uses 160
+of the 200 (one epoch, seed 0). No evaluation split exists yet, so there is no in-loop evaluation;
+checkpoints are saved every 5 steps for selection afterwards on generated held-out data.
+**Config.** `train.py` defaults: LoRA rank 32 without an unembedding adapter, learning rate 1e-5,
+`importance_sampling`, no KL penalty, constant-reward groups removed, T = 1.0, ≤8 turns.
+**Cost bound.** 20 steps × $1.404 = $28.08 estimated at list prices; bounded by `max_steps`.
+Balance before launch, estimated: $128.00 opening − $2.81 smoke − $3.16 for three baseline
+passes = $122.03. Stage 2 (to 40 steps) only if the reward curve is rising and the bill for the
+smoke run agrees with the per-turn estimate.
+**Operational.** Launched detached so the session's 30-minute limit on background commands
+cannot kill it; the machine is kept awake for the duration; the monitor mirrors logs and curves
+to object storage every two minutes. If it dies, `behavior_if_log_dir_exists=resume` continues
+from the last checkpoint.
+**To report afterwards (requested by the Fireworks agent):** which of the three baseline groups
+moved on the 186 — the 72 never solved, the 66 mixed, the 48 always solved.
