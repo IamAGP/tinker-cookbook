@@ -199,9 +199,9 @@ All figures are produced by `make_figures.py` from the run folders; the values p
 | cost of a run with evaluations | $37.25 billed | T11 |
 
 ### Open before publishing
-- No training result for the 9B on Fireworks yet; the Fireworks side has a baseline and a
-  two-update plumbing trial on the 27B only.
 - The training objective is described in words; the exact formula should be quoted from the
   official Tinker documentation, not written from memory.
 - Two or three more worked examples, with the rule for choosing them stated.
 - The hint experiment, if it is run, would change the ending.
+- This post covers the Qwen3.5-9B runs on Tinker only. The same recipe applied to a larger model
+  on Fireworks is written up separately; link it here once it exists.

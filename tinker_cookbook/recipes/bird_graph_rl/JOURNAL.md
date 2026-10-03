@@ -1260,3 +1260,10 @@ Qwen3.8-27B: training, sampling from a saved adapter and saving state all work; 
 It says nothing about learning and is not the 9B. Worth noting for the design: the 27B answered
 29 of 32 and 25 of 32 of the generated training questions correctly before any training, so
 this training set leaves the larger model little to learn from.
+
+**Decision by the owner (2026-10-03 evening): two separate write-ups.** This journal and
+`blog/draft.md` cover the Qwen3.5-9B runs on Tinker. The Fireworks work is written up separately
+from the Fireworks agent's own journal. For the record of what that arm is: the 9B could not be
+trained on Fireworks on this account (dedicated hardware was refused for lack of a payment
+method), so with the owner's go-ahead the run 1 recipe is being applied there to Qwen3.8-27B on
+serverless — a different student, so not a platform replication of the runs in this journal.
