@@ -25,7 +25,7 @@ from typing import Any, TypedDict
 
 import chz
 from dotenv import load_dotenv
-from neo4j import AsyncDriver, AsyncGraphDatabase
+from neo4j import AsyncDriver, AsyncGraphDatabase, unit_of_work
 
 from tinker_cookbook import model_info, tokenizer_utils
 from tinker_cookbook.recipes.bird_graph_rl.baseline_eval import (
@@ -94,6 +94,35 @@ def get_driver(env_file: str) -> AsyncDriver:
     return _DRIVERS[uri]
 
 
+TRAIN_QUERY_TIMEOUT_S = 45.0
+
+
+class TrainingCypherTool(CypherTool):
+    """The evaluation tool with a shorter per-query limit, for training only.
+
+    In a synchronous training step every rollout waits for the slowest one, and a single
+    pathological query (an unindexed join, a Cartesian product) runs to the database's 120 s
+    limit. Measured over the first run's 6,424 calls, the slowest successful query took 23.8 s
+    and nothing finished between 30 s and the limit, so 45 s changes no outcome: the same queries
+    fail with the same kind of error, sooner. Evaluation keeps the 120 s limit, where every
+    baseline was measured.
+    """
+
+    async def execute(self, query: str, row_cap: int) -> list[list[Any]]:
+        @unit_of_work(timeout=TRAIN_QUERY_TIMEOUT_S)
+        async def work(tx: Any) -> list[list[Any]]:
+            result = await tx.run(query)
+            rows: list[list[Any]] = []
+            async for record in result:
+                rows.append(list(record.values()))
+                if len(rows) >= row_cap:
+                    break
+            return rows
+
+        async with self._driver.session(database=self._database) as session:
+            return await session.execute_read(work)
+
+
 class ExecutionReward:
     """Grades one rollout from the queries its own tool instance recorded."""
 
@@ -156,7 +185,7 @@ class GraphEnvGroupBuilder(EnvGroupBuilder):
         envs: list[Env] = []
         for _ in range(self.group_size):
             # The tool records the queries of one rollout, so each rollout gets its own instance.
-            tool = CypherTool(driver, self.database)
+            tool = TrainingCypherTool(driver, self.database)
             messages = renderer.create_conversation_prefix_with_tools(
                 tools=[tool.run_cypher.to_spec()], system_prompt=SYSTEM_PROMPT
             ) + [{"role": "user", "content": prompt_text(self.datum)}]

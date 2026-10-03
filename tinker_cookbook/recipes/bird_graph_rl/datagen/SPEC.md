@@ -182,3 +182,39 @@ references minus one), an upper bound on graph hops.
 - **Consequence of moving deep structures to held-out:** the held-out-structure question set is far
   deeper than training (0.600 at 3–4 hops against 0.158), so any comparison of seen and unseen
   structures must be made at matched hop count.
+
+## Amendment D (2026-10-03) — a second training set whose mix follows human-written questions
+**Why.** The first run improved a lot on generated questions and little on human ones. Measured
+before that result, on 6,601 human-written questions from another benchmark split (69 other
+databases): people mostly ask plain lookups and counts, while the first training set was 48.7%
+sum / avg / min / max. This amendment builds a second **training** set; nothing held out changes.
+
+**Frozen — do not modify, regenerate or re-split:** every existing file in `out/`, every existing
+instance id, the 264 held-out-instance questions, the 360 held-out-structure questions and the
+split and novelty tags of every existing structure. The second training set lives in `out/v4/`.
+
+**Build `out/v4/questions_v4_train.jsonl`: 320 training questions** (`instance_id`, `question`),
+with `out/v4/instances_v4_train.jsonl` holding their instances in the existing format (hints per
+B5; rules B1, B2, B6 for wording). Target mix, taken from that human set — aim within about three
+points on each line and report what was achieved:
+- aggregation: none 55% · count 25% · sum 7% · count distinct 3% · avg 3% · max 2% · min 1% ·
+  more than one aggregate 5%
+- ordering: none 83% · argmax or argmin (top 1) 14% · top-k 1% · n-th ranked under 1% ·
+  order with no limit at most 1%
+- grouping: about 10% of questions
+- extras: none 72% · distinct projection 9% · ratio 8% · conditional aggregate 8% · negation 3% ·
+  comparison of two named entities 2% · having 1% · existence 1%
+- returned columns: one 84% · two 12% · three or more 4%
+- depth: about 70% at ≤1 hop, about 20% at 2 hops, about 10% at 3–4 hops
+
+**How to reach it.** Reuse existing training structures and instances where they fit. Add **new
+training structures** where the mix needs them — mostly plain lookups and counts at 0–2 hops —
+each verified by execution exactly as before. Constraints on anything new: its signature must
+not equal that of any held-out structure, and it must not use any component that the split holds
+out entirely (the `unseen_components` of novel-component structures); otherwise the held-out
+tags would stop meaning what they say. Keep at most 5 questions per structure and no question
+that also appears in a held-out set.
+
+**Report** (`out/v4/report.json` and the README): achieved shares beside each target, computed;
+counts of reused and new structures; and explicit checks that no v4 training structure equals a
+held-out signature and that no held-out component was introduced.

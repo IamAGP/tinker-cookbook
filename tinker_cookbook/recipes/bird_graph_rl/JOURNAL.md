@@ -1013,3 +1013,32 @@ databases, none of them the evaluation database, CC BY-SA 4.0. I verified the so
 licence from the Hugging Face API; the shape classification was done by the Fireworks agent and
 I have not re-run it myself. Its limits: the questions were written by the benchmark's annotators
 for SQL on other databases, so "what people ask" means "what that benchmark's annotators wrote".
+
+## 2026-10-03 — E9 pre-registration: run 2, a human-like question mix (written before any data or run exists)
+
+**Hypothesis.** The first run's gain did not carry to human questions because the training
+questions do not resemble them in shape. Evidence, all predating the milestone result and none
+from the 186: sum / avg / min / max are 48.7% of training questions and 12.2% of human asks;
+plain lookups 31.7% against 54.6%.
+**Prediction.** Training on a set whose shape mix follows the human one raises accuracy *in
+substance* on the 186, i.e. lenient accuracy, which run 1 left flat (+0.003).
+**Design — one thing changes.** Same model (Qwen3.5-9B from base), same 37 steps × 8 groups × 8
+rollouts, same learning rate 1e-5, rank 32, no unembedding adapter, same reward, same prompt and
+tool. The training file is the new 320-question set of amendment D. One declared environment
+difference: a 45 s per-query limit in training (`TrainingCypherTool`), which over run 1's 6,424
+calls would have changed no outcome; evaluation keeps 120 s.
+**Evaluated checkpoint fixed in advance: step 37.** No selection, so no held-out set is needed to
+choose, and the number of updates equals run 1's selected checkpoint.
+**Evaluations.** The 186 at four samples; the same 264 held-out-instance and 360
+held-out-structure questions as run 1, one sample each.
+**How it will be read.**
+1. *Run 2 against the baseline (0.4207):* the same bar as milestone 1 — lower bound above zero
+   and at least +0.05. Reported as "run 2", a separate result; milestone 1 stands as it is.
+2. *The hypothesis test:* lenient accuracy on the 186, run 2 minus baseline, paired bootstrap.
+   Interval above zero → substance transferred, hypothesis supported. Interval including zero →
+   not supported by this run.
+3. *Run 2 against run 1 on the 186:* paired, descriptive.
+4. The held-out generated sets follow the *old* mix, so run 2 may do worse there than run 1; that
+   would not count against the hypothesis and is reported as it comes.
+**Cost bound.** Training at most 37 steps; run 1's training was estimated at $35.09 and billed
+about a quarter less. Evaluations estimated at $9. Console balance before: $83.04.
