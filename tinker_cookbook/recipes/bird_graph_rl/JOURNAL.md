@@ -365,3 +365,31 @@ estimate. This should be re-measured at the k we settle on before designing arou
   decision model be served on rented serverless GPUs, and how; (b) which Tinker-served model is
   the strongest frontier reference by provider-reported agentic results. The live Tinker list
   today is unchanged from 2026-09-21 (31 models, 19 base).
+
+## 2026-10-03 — research (official sources): can the open decision model be self-hosted? (T9)
+
+Sub-agent report, sources limited to the model's Hugging Face repo files, vLLM and transformers
+source, and docs.runpod.io. Subject: `perplexity-ai/pplx-decider-v1-27b`.
+
+- **Deployable, but only as a custom container running the repo's own PyTorch code — not vLLM.**
+  `config.json` declares `Qwen3_5Model` (backbone only); the checkpoint has **no `lm_head`**, and
+  the decision head is a separate `readout.safetensors` (a 255-way linear layer over the last
+  hidden state, with a calibrated temperature). vLLM does not register that architecture string
+  and would fall back to treating it as an embedding model.
+- The repo ships its own inference package and a FastAPI server (`POST /v1/systemone`), with one
+  in-flight request per worker (returns HTTP 529 when busy).
+- **Input cap is 8,192 tokens in the shipped code** (`prepare(..., max_length=8192)`, raises
+  rather than truncating). An earlier note of mine repeated "250k context" from a non-official
+  summary; the official inference code does not support that claim. Corrected here.
+- Weights are 48.59 GiB BF16, single device only → an 80 GB card. Serverless price for an
+  A100 80 GB is $2.72/hr per the live catalogue (the $1.39/hr I quoted earlier was the on-demand
+  pod figure, not serverless). No official quantised variant exists.
+- Unverified from official sources: cold-start time for ~49 GiB, any serverless image-size limit,
+  peak working memory, and the hosted API's price.
+- The same model is also offered by its publisher as a hosted endpoint with the same semantics.
+
+**Assessment for T9 (stretch).** Self-hosting is roughly a day of engineering (custom ~50 GiB
+image, health-check patch, concurrency 1) for a task that is already optional under a two-week
+deadline. If the judge experiment runs, the publisher's hosted endpoint of the same open weights
+gives identical semantics with no infrastructure; self-host only if the hosting itself is wanted
+as content. The 8,192-token cap is compatible with the planned judge input (≤30 rows, ≤3,000 chars).
