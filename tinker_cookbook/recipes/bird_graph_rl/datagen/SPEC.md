@@ -232,3 +232,14 @@ held-out signature and that no held-out component was introduced.
   junction table removes a hop, but modelling a column as a node (tags) adds one.
 - Write the explicit list of new training structures (id and signature) to
   `out/v4/new_structures.json`, so the two held-out checks can be reproduced by another agent.
+
+## Amendment D2 (2026-10-03) — a second batch of new-mix training questions
+The first 320 stay exactly as delivered: they are the data of the pre-registered run and are
+frozen once reported. Build a **second, separate batch of 280 more** training questions with the
+same target mix and the same constraints as amendment D and its notes, in
+`out/v4/questions_v4_train_batch2.jsonl` and `out/v4/instances_v4_train_batch2.jsonl`. They let
+the run continue for a further 37 steps (592 questions in all at 8 per step) without repeating a
+question. No instance may appear in both batches; the limit of 5 questions per structure applies
+across the two batches together. Report the achieved mix of the batch on its own.
+- **Negation** is a component the split holds out entirely, so it cannot appear in training;
+  its 3% is dropped from the target and reported as a declared shortfall, in both batches.
