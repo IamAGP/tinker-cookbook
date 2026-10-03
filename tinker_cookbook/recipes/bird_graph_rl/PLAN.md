@@ -11,7 +11,10 @@ training-data generation). Research questions go to sub-agents restricted to off
 
 **Rules.** Official sources only. Shared code is imported and pinned by git blob hash, never
 re-implemented from prose. BIRD's 186 questions are evaluation only and are never read by the
-data generator. Preflight, opening balance and a cost stop before anything billed. **Every number is computed with a
+data generator. **Declared exception, and the line it draws:** properties of the *harness format* may inform
+training data (that prompts carry a hint, the tool, the caps); statistics about the *content* of
+the 186 may not. One such format statistic is used: 172 of the 186 evaluation prompts carry a
+hint (0.925), so about 92% of generated prompts do too. Nothing else from the 186 enters generation. Preflight, opening balance and a cost stop before anything billed. **Every number is computed with a
 tool** — measured, or calculated by a script from stated inputs and labelled an estimate — never
 mental arithmetic or a predicted quantity, in messages between agents as much as in reports.
 

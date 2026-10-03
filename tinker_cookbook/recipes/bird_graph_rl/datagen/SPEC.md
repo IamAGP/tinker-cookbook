@@ -132,3 +132,14 @@ Two of the causes are rules written above; they are withdrawn here.
   same structure beyond what the meaning forces.
 
 Redo the pilot (60 questions) under B1–B6 before scaling, and report how many structures B3 removed.
+
+## Notes on amendments B (2026-10-03, from review)
+- **B5's "about 92%" is the one statistic taken from the evaluation set**: 172 of its 186 prompts
+  carry a hint. It describes the prompt *format*, not any question's content, and is declared as
+  the single exception in `../PLAN.md`. B4's figures are measurements of the generated output
+  only and must stay that way: "unlike the evaluation set" is a reason to redo a pilot, never a
+  numeric target for anchors or return shapes.
+- **B3 is a model's judgement and is audited by someone other than the generator** before the
+  split is frozen: every dropped structure's intent sentence is read, and a sample of the kept
+  ones, by a person or another agent. An independent check also compares the coarse shapes kept
+  and dropped against the shapes people ask in a human-written question set from other databases.
