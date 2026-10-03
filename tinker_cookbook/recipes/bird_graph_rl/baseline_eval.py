@@ -213,9 +213,12 @@ class CypherTool:
 @chz.chz
 class Config:
     base_model: str = "Qwen/Qwen3.8-27B"
+    model_path: str | None = None             # tinker://… sampler weights of a trained checkpoint
     renderer_name: str | None = None          # None -> model_info recommended default
     reference_uri: str = ""                   # s3://bucket/key of reference_answers.json
     gold_set: str = "corrected_20251106"
+    instances_path: str = ""                  # instead of reference_uri: a generated instances file
+    instances_split: str = "heldout_instance"
     log_path: str = "~/bird_rl_runs/e2_baseline"
     env_file: str = ".env"
     neo4j_database: str = "neo4j"
@@ -233,6 +236,22 @@ def load_references(uri: str, gold_set: str) -> list[dict[str, Any]]:
     bucket, key = uri.removeprefix("s3://").split("/", 1)
     body = boto3.client("s3").get_object(Bucket=bucket, Key=key)["Body"].read()
     return json.loads(body)["results"][gold_set]
+
+
+def load_generated(path: str, split: str) -> list[dict[str, Any]]:
+    """Generated questions in the same shape as the benchmark references, so one harness scores both."""
+    refs: list[dict[str, Any]] = []
+    with Path(os.path.expanduser(path)).open() as f:
+        for line in f:
+            if not line.strip():
+                continue
+            d = json.loads(line)
+            if d["split"] != split:
+                continue
+            refs.append({"question_id": d["instance_id"], "question": d["question"], "evidence": d.get("hint", ""),
+                         "rows": d["rows"], "n_rows": d["n_rows"], "truncated": False,
+                         "difficulty": f"hops{d['hops']}", "structure_id": d["structure_id"]})
+    return refs
 
 
 def question_text(ref: dict[str, Any]) -> str:
@@ -268,14 +287,19 @@ async def main(cfg: Config) -> None:
     results_path = log_dir / "results.jsonl"
     done_ids = {json.loads(l)["question_id"] for l in results_path.open()} if results_path.exists() else set()
 
-    refs = load_references(cfg.reference_uri, cfg.gold_set)
+    if cfg.instances_path:
+        refs = load_generated(cfg.instances_path, cfg.instances_split)
+    else:
+        refs = load_references(cfg.reference_uri, cfg.gold_set)
     if cfg.limit:
         refs = refs[: cfg.limit]
     todo = [r for r in refs if r["question_id"] not in done_ids]
 
     renderer_name = cfg.renderer_name or model_info.get_recommended_renderer_name(cfg.base_model)
     prices = PRICES_PER_M[cfg.base_model]
-    run_meta = {"experiment": "E2-baseline", "model": cfg.base_model, "renderer": renderer_name,
+    run_meta = {"experiment": "E2-baseline", "model": cfg.base_model, "model_path": cfg.model_path,
+                "data": cfg.instances_path or cfg.reference_uri.rsplit("/", 1)[-1], "split": cfg.instances_split if cfg.instances_path else cfg.gold_set,
+                "renderer": renderer_name,
                 "temperature": cfg.temperature, "max_turns": cfg.max_turns, "max_tokens": cfg.max_tokens, "max_sampled_tokens": cfg.max_sampled_tokens,
                 "questions_total": len(refs), "already_done": len(done_ids),
                 "started_utc": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds")}
@@ -287,7 +311,10 @@ async def main(cfg: Config) -> None:
     service = tinker.ServiceClient(user_metadata={**recipe_user_metadata("bird_graph_rl_baseline"),
                                                   "project": "bird-rl", "experiment": "E2-baseline",
                                                   "model": cfg.base_model})
-    sampling_client = await service.create_sampling_client_async(base_model=cfg.base_model)
+    if cfg.model_path:
+        sampling_client = await service.create_sampling_client_async(model_path=cfg.model_path)
+    else:
+        sampling_client = await service.create_sampling_client_async(base_model=cfg.base_model)
     policy = TinkerTokenCompleter(sampling_client, max_tokens=cfg.max_tokens, temperature=cfg.temperature)
     renderer = get_renderer(renderer_name, tokenizer_utils.get_tokenizer(cfg.base_model))
 
