@@ -456,3 +456,36 @@ if the interval's lower bound is above 0 **and** the point estimate is ≥ 5 poi
 the simple tier must not fall by more than 3 points. Checkpoint chosen on generated
 `heldout_instance` data and evaluated once on the 186. Held-out structures reported separately
 as novel-combination and novel-component, descriptive, no bar.
+
+## 2026-10-03 — T4 built: RL environment and training entry point (no sampling yet)
+
+`rl_env.py` follows upstream's `recipes/search_tool/search_env.py`: one group builder per
+question, `group_size` rollouts each, every rollout built by `build_agent_tool_env`. It imports
+the system prompt, tool and caps from `baseline_eval.py` and the reward from `reward.py`, so
+training and evaluation share one definition of the task. Each rollout gets its own tool instance
+(the tool records that rollout's queries); the database driver is one per process. Parse-failure
+and context-overflow rewards are set to 0 so the reward stays on [0, 1].
+`train.py` mirrors `recipes/search_tool/train.py`; every `rl.train.Config` field it sets was
+checked to exist in the merged upstream code.
+
+**Offline validation (free):** 40 of 40 sampled generated instances score exactly 1.0 when their
+own query is replayed through the RL reward; wrong query → 0; no query → 0; the environment
+builds and renders an 883-token initial prompt.
+
+**Corrected definition (Fireworks agent, ledger F28):** "hit the turn cap" was reported under
+two definitions. Cut off by the cap (`stop_reason == max_turns`): 14 / 36 / 70 for the 27B / 9B /
+4B. Used all eight turns: 22 / 39 / 72. The first is the one that means the cap cost an answer
+and is the one to publish; my E3 note used the second.
+
+**Interface notes from Codex's interim output (not yet reviewed in full):** queries are
+parameterised (`$anchor`) and rows are dicts, so a small adapter is needed to produce the
+training file; and at least some enumerated structures read unnaturally as questions (e.g.
+counting user–badge pairs that share a badge with a given user), so stage B needs a naturalness
+filter rather than a question for every instance.
+
+**Proposed first-run configuration (to be confirmed by a two-update smoke run):** Qwen3.5-9B,
+recommended renderer, LoRA rank 32, `importance_sampling` loss, no KL penalty, learning rate
+1e-5 (the value an earlier RL project in this repo found workable; to be re-checked against the
+cookbook's guidance), 16 groups × 8 rollouts, constant-reward groups removed.
+**Blocked on:** natural-language questions for generated instances (stage B), and the owner's
+confirmation of the student model. The smoke run is billed and creates a checkpoint, so it waits.
