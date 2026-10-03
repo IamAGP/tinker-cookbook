@@ -1129,3 +1129,28 @@ by Codex under amendment D; snapshot mirrored to object storage (`datagen_v4/`).
   bounds worded as ranges (reworded). The run uses 296 of the 320 (37 steps × 8, shuffle seed 0).
 - A second batch of 280 with the same mix exists for the pre-registered extension (amendment D2);
   it is not used by this run and has not yet been checked by the training side.
+
+**E9 note, recorded while run 2 trains and before any result exists (2026-10-03 16:04): the
+hints are a third suspect for the transfer gap.** Found by the Fireworks agent from the files;
+reproduced here with a cruder word-overlap test.
+- In human-written hints the explained phrase comes from the question. A hint clause "X refers
+  to Y" where X shares no word with the question occurs in 2.2% of human hints (115 of 5,121,
+  BIRD training split, 69 other databases; her measurement, not reproduced here).
+- In run 2's training file it is 239 of 291 hints (82.1%; my check gives the same 239). In run
+  1's 300-question file my check gives 232 of 284 (81.7%); she measures 82.7% on the full 600.
+  75 of run 2's hints say "score refers to Score" for a question that never mentions score: the
+  generator explains fields its query carries internally, not what the question asks.
+- **It is the same in both arms, so it does not confound run 2 against run 1**, and run 2 cannot
+  test it. Named now so that it is not invented after the result: if run 2 does not move lenient
+  accuracy on the 186, this is the next suspect. How it would act — a policy learning to discount
+  hints that name fields it must not return — is a hypothesis, not a finding.
+- **Decided in advance:** the extension branch of the follow-up rule uses the second batch with
+  its hints as generated. Rewriting hints is a separate experiment with its own pre-registration;
+  folding it into the extension would change two things at once.
+- She also re-derived the mix of the 320 from the query text: it matches the generator's tags
+  (lookups 55.0%, "how many" 27.8%, one returned column 84.1%, no negation). That closes the
+  caveat recorded above. Two small wording defects remain in the frozen file: 7 of 26 conditional
+  aggregates have a condition already decided by the range filter, and 5 questions begin
+  "How many the". Gold answers are unaffected.
+- The hint rate can be cited from other databases (92.8% of 6,601 BIRD training questions carry
+  a hint) rather than from the 186.
