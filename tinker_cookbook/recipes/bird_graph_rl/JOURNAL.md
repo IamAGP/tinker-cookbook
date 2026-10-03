@@ -820,3 +820,20 @@ the data files; the confound comes from a choice both of us made.
 of human asks in BIRD's training split, and plain lookups are under-represented (31.7% against
 54.6%); 15.3% of training questions ask for an ordering with no limit, which the order-insensitive
 scorer cannot reward or test, so nothing may be claimed about learning to order results.
+
+**Pre-registration addendum 3, written while no trained checkpoint has been evaluated on the 186
+(2026-10-03, proposed by the Fireworks agent, agreed here).**
+1. Whatever run 1's selected checkpoint scores on the 186 **is** the milestone 1 result, reported
+   as it is, hit or miss.
+2. Any later run evaluated on the 186 is a separate, labelled result. The write-up reports all of
+   them, including the first if it missed. Nothing is replaced.
+3. If a second data pass happens, what it changes must be fixed from evidence that is **not** the
+   186. The aggregation mix measured against BIRD's training split qualifies: it was measured
+   before any result and comes from other databases. A change motivated by which of the 186
+   questions failed does not qualify — that would turn the held-out set into a development set.
+4. Failures on the 186 may be described in the write-up (which group moved, by tier), but not
+   mined to decide what training data to add. If a development set of human questions is wanted
+   for that, BIRD's dev split has ten other databases never used here; that needs its own graph
+   and is an option, not a plan.
+I had written earlier today that if run 1 fell short, the aggregation mismatch would be my first
+suspect and worth a second pass. That intention stands only under point 3.
