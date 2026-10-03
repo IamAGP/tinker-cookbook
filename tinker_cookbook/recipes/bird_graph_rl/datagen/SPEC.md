@@ -1,0 +1,79 @@
+# Data generation spec — stage A (query-first)
+
+**Why query-first.** The 186 evaluation questions cover only 64 distinct query structures and
+never join more than three tables. Writing questions first and hoping they cover the space
+produced template memorisation on an earlier project. Here the *query structure* is enumerated
+deliberately, each query is executed so its answer is ground truth by construction, and the
+natural-language question is written afterwards (stage B, separate).
+
+## Hard rules
+1. **Never read** anything under `gold/` in object storage, `reference_answers.json`, the BIRD
+   question files, or `~/bird_rl_runs/`. The evaluation set must stay unseen by the generator.
+2. Read-only against the graph: use read transactions only. Connection settings come from the
+   repo-root `.env` (`BIRD_NEO4J_URI`, `BIRD_NEO4J_USER`, `BIRD_NEO4J_PASSWORD`) via
+   `python-dotenv`. Never print, log or write those values.
+3. Do not `git commit` or `git push`. Do not modify files outside `datagen/`.
+4. Use the repo interpreter `.venv/bin/python`. No new dependencies.
+5. Everything deterministic under a fixed seed.
+
+## The graph
+Schema, property names, types and traps: `../DATA_HANDOFF.md` §3–4 and the `SYSTEM_PROMPT` in
+`../baseline_eval.py`. Cypher 25. Datetimes are LOCAL DATETIME (`x.creationDate.year = 2010`),
+`Vote.creationDate` is DATE, NULLs are absent, `displayName` is not unique, `ON_POST` is used by
+both Comment and Vote.
+
+## What to build (`datagen/`)
+- `structures.py` — enumerates **query structures** and gives each a stable `structure_id` and a
+  canonical `signature`. A structure is the tuple:
+  `(path, filters, aggregation, grouping, ordering, extras)` where
+  - `path`: ordered node-label / relationship-type sequence, 0 to 4 hops, valid in the schema
+    (include self-joins such as Answer→Question, Post→LINKS_TO→Post, and two-branch patterns
+    such as User→Post and User→Badge);
+  - `filters`: multiset of filter kinds — equality on id/name, numeric range, year/date range,
+    string CONTAINS / STARTS WITH, IS NULL / IS NOT NULL, label test (Question/Answer);
+  - `aggregation`: none, count, count distinct, sum, avg, min, max;
+  - `grouping`: none or group-by key;
+  - `ordering`: none, order-by, top-k (LIMIT k), argmax/argmin (LIMIT 1);
+  - `extras`: subset of {existence (`EXISTS {}`), negation, ratio/percentage, difference of two
+    aggregates, comparison between two named entities, HAVING-style post-filter (`WITH … WHERE`)}.
+  Two queries share a structure iff their signatures are equal; parameter values never enter it.
+- `generate.py` — for each structure, samples parameter values **from the graph** (seeded),
+  renders Cypher, executes it, and keeps an instance only if all hold:
+  1. it runs without error in ≤ 5 s;
+  2. 1 ≤ rows ≤ 200, and not every value is NULL;
+  3. deterministic: for top-k / argmax, the k-th and (k+1)-th sort keys differ (no tie at the
+     cut); `ORDER BY` has a total order or the result is compared as a set;
+  4. unambiguous naming: a `displayName` used as a filter must match exactly one user;
+  5. not trivial: the same structure does not return the identical answer for every sampled
+     parameter set.
+  At most 12 instances per structure, with distinct parameter values.
+- `split.py` — assigns each **structure** (not instance) to `train` or `heldout_structure`
+  (about 80/20, seeded, stratified by hop count), so the held-out set contains only structures
+  the model never trained on. Also emits a third set, `heldout_instance`: unseen parameter
+  values for *training* structures.
+- `*_test.py` — colocated unit tests (no database): signature stability, signature equality /
+  inequality cases, split is by structure and reproducible under the seed.
+- `README.md` — how to run, what was produced, counts.
+
+## Output (`datagen/out/`, gitignored — create `datagen/.gitignore`)
+- `structures.jsonl` — `structure_id, signature, hops, n_instances, split`.
+- `instances.jsonl` — `instance_id, structure_id, split, hops, cypher, params, n_rows,
+  rows (all, ≤200), runtime_ms`.
+- `report.json` — counts by hop, by aggregation, by extras; rejection counts per filter rule;
+  totals.
+
+## Targets
+≥ 150 distinct structures spanning 0–4 hops (not more than 35% of them at ≤ 1 hop),
+≥ 1,500 kept instances. If a target cannot be met, say why in `README.md` with the rejection
+counts — do not pad with near-duplicate structures.
+
+## Pilot of stage B (small, to validate the format only)
+For 60 instances spread across hop counts, write one natural-language question each into
+`out/pilot_questions.jsonl` (`instance_id, question`). A question must be answerable from the
+Cypher's result alone, must name the exact return columns asked for, must not mention labels,
+relationship types or property names, and must not be a paraphrase template (vary form).
+
+## Report back
+Final message: the counts from `report.json`, the three hardest design choices you made and
+why, anything in this spec you think is wrong, and what would break if stage B were scaled to
+all instances.

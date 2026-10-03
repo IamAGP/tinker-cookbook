@@ -17,10 +17,33 @@ counts when every one of its values matches.
 
 from __future__ import annotations
 
+import json
 from collections import Counter
 from typing import Any
 
-from tinker_cookbook.recipes.bird_graph_rl.baseline_eval import row_key
+import boto3
+
+from tinker_cookbook.recipes.bird_graph_rl.baseline_eval import load_references, row_key
+
+FULL_ROWS_KEY = "codebase_community/gold/reference_rows_full.json"
+
+
+def load_references_exact(reference_uri: str, gold_set: str = "corrected_20251106") -> list[dict[str, Any]]:
+    """References with complete rows, so row-level F1 is exact for every question.
+
+    `reference_answers.json` caps stored rows at 200, which left 11 questions unscoreable
+    exactly. `reference_rows_full.json` holds their complete result sets; this merges them in
+    and clears the `truncated` flag, so the approximate branch below is never taken.
+    """
+    refs = load_references(reference_uri, gold_set)
+    bucket = reference_uri.removeprefix("s3://").split("/", 1)[0]
+    full = json.loads(boto3.client("s3").get_object(Bucket=bucket, Key=FULL_ROWS_KEY)["Body"].read())
+    for r in refs:
+        entry = full.get(str(r["question_id"]))
+        if entry is not None:
+            assert entry["n_rows"] == r["n_rows"], f"row-count drift on q{r['question_id']}"
+            r["rows"], r["truncated"] = entry["rows"], False
+    return refs
 
 
 def _f1(got: list[tuple[str, ...]], want: list[tuple[str, ...]]) -> float:
@@ -41,9 +64,8 @@ def partial_credit(model_rows: list[list[Any]], ref: dict[str, Any]) -> dict[str
     """Graded reward in [0, 1]; 1.0 exactly when the strict scorer would also say correct.
 
     `ref` is one entry of reference_answers.json: `rows` (capped at 200), `n_rows`, `truncated`.
-    For a truncated reference the true F1 is not computable — only 200 of the reference rows were
-    stored — so credit falls back to how many of those 200 appear, scaled by how close the row
-    count is. 11 of the 186 questions are in that case.
+    Use `load_references_exact` so every reference carries complete rows; the truncated branch
+    below is then dead code, kept only as a fallback for a reference built without it.
     """
     ref_rows: list[list[Any]] = ref.get("rows") or []
     ref_n = int(ref.get("n_rows", len(ref_rows)))

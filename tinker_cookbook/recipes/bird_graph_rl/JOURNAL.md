@@ -343,3 +343,25 @@ better than binary, but it is not the answer to the dead-group problem.
 **Important caveat on the "52".** It was measured at k=2. GRPO will use a group of 8, where more
 questions will produce mixed outcomes, so 52 is an upper bound on dead questions, not an
 estimate. This should be re-measured at the k we settle on before designing around it.
+
+## 2026-10-03 (later) — exact references, plan frozen for review, data generation started
+
+- **Exact reference rows.** The 11 questions whose stored rows were capped at 200 now have their
+  complete result sets (60,527 rows; `etl/lambda_full_refs.py`, one-off Lambda, deleted after).
+  Every re-executed row count equalled the stored `n_rows`. `reward.load_references_exact`
+  merges them, so row-level F1 is exact for all 186 and the approximate branch is dead code.
+  Re-measured: mean partial credit 0.640 (Tinker run) / 0.643 (Fireworks run); every structural
+  count unchanged (52 never solved, 13 rescued, 39 at zero, spread 42 → 47). The Fireworks
+  session reproduced the counts independently and the same 13 question ids.
+  *Not yet done:* re-executing all 186 gold SQLs and diffing against the stored reference, as a
+  drift check on the gold itself (requested by the Fireworks session; cheap; open).
+- **Hard stop is 2026-10-17**, not the credit expiry. `PLAN.md` holds tasks, owners, dates and
+  the cut order. The owner's objective, verbatim in spirit: smaller open model → baseline →
+  post-train → measure the gain → publish.
+- **Data generation (critical path)** is specified in `datagen/SPEC.md`: query-first, structures
+  enumerated and split *by structure* so a held-out-structure test exists, generator forbidden
+  from reading the evaluation set. Handed to Codex (`gpt-6.1-sol`) running in this repo.
+- **Research dispatched to sub-agents, official sources only:** (a) can the open-weights
+  decision model be served on rented serverless GPUs, and how; (b) which Tinker-served model is
+  the strongest frontier reference by provider-reported agentic results. The live Tinker list
+  today is unchanged from 2026-09-21 (31 models, 19 base).
