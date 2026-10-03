@@ -996,3 +996,20 @@ training-token count from the usage API would, and that API has still returned n
 **Checkpoint retention (from the console):** periodic checkpoints expire in 7 days; `final` ones
 never. The selected checkpoint is a `final` and is kept; steps 10 and 30 will expire around
 2026-10-10, before the write-up deadline. Their held-out evaluations are already stored.
+
+## 2026-10-03 — checkpoints preserved outside Tinker; two open questions closed
+
+The adapters for steps 10, 20, 30 and the selected step 37 are now in object storage (1.384 GB),
+downloaded with `tinker checkpoint download` and removed from the laptop afterwards. Periodic
+checkpoints expire on Tinker after 7 days, and credits expire on 2026-11-13, so the copies are
+the durable record. Only sampler weights can be downloaded; the training state (needed to resume
+with optimiser state) cannot.
+Closed by reading the exported adapter: **LoRA alpha is 32 at rank 32** (the value the Fireworks
+SDK pins, so the two platforms match on scale), and the adapter contains **no unembedding
+tensors**, confirming the `train_unembed=False` setting applied.
+**Source of "what people ask"** (asked by the owner): BIRD's official filtered training split,
+`birdsql/bird23-train-filtered` on Hugging Face — 6,601 human-written question–SQL pairs over 69
+databases, none of them the evaluation database, CC BY-SA 4.0. I verified the source, size and
+licence from the Hugging Face API; the shape classification was done by the Fireworks agent and
+I have not re-run it myself. Its limits: the questions were written by the benchmark's annotators
+for SQL on other databases, so "what people ask" means "what that benchmark's annotators wrote".
