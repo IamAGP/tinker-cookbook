@@ -11,6 +11,7 @@ import asyncio
 from datetime import datetime
 
 import chz
+import tinker
 
 from tinker_cookbook import cli_utils
 from tinker_cookbook.recipes.bird_graph_rl.rl_env import GraphQADatasetBuilder
@@ -23,6 +24,10 @@ class CLIConfig:
     model_name: str = "Qwen/Qwen3.5-9B"
     renderer_name: str | None = None  # None -> model_info recommended default (same as the baseline)
     lora_rank: int = 32
+    # The SDK default is True. False keeps the adapter to attention and MLP layers, which is what
+    # other serving platforms accept for this model family, so a trained adapter stays portable.
+    # Whether it costs any task performance has not been measured.
+    train_unembed: bool = False
     load_checkpoint_path: str | None = None
 
     # Data
@@ -31,6 +36,7 @@ class CLIConfig:
     test_split: str | None = "heldout_instance"
     test_size: int = 64
     n_epochs: int = 1
+    env_file: str = ".env"
 
     # Rollouts — identical caps to baseline_eval.py
     group_size: int = 8          # rollouts per question
@@ -56,7 +62,20 @@ class CLIConfig:
     behavior_if_log_dir_exists: cli_utils.LogdirBehavior = "ask"
 
 
+def _pin_lora_layers(train_unembed: bool) -> None:
+    """``rl.train`` creates the training client without exposing which layers get adapters, so the
+    choice is applied where the client is created."""
+    original = tinker.ServiceClient.create_lora_training_client_async
+
+    async def create(self: tinker.ServiceClient, *args: object, **kwargs: object) -> tinker.TrainingClient:
+        kwargs.setdefault("train_unembed", train_unembed)
+        return await original(self, *args, **kwargs)  # type: ignore[arg-type]
+
+    tinker.ServiceClient.create_lora_training_client_async = create  # type: ignore[method-assign]
+
+
 async def cli_main(cfg: CLIConfig) -> None:
+    _pin_lora_layers(cfg.train_unembed)
     builder = GraphQADatasetBuilder(
         instances_path=cfg.instances_path,
         model_name_for_tokenizer=cfg.model_name,
@@ -69,6 +88,7 @@ async def cli_main(cfg: CLIConfig) -> None:
         n_epochs=cfg.n_epochs,
         max_turns=cfg.max_turns,
         max_trajectory_tokens=cfg.max_trajectory_tokens,
+        env_file=cfg.env_file,
         seed=cfg.seed,
     )
     run_name = (

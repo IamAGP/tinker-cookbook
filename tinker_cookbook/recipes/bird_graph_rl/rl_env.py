@@ -71,6 +71,7 @@ def prompt_text(datum: GraphQADatum) -> str:
     return f"{datum['question']}\n\nHint: {hint}" if hint else datum["question"]
 
 
+MAX_CONCURRENT_QUERIES = 24
 _DRIVERS: dict[str, AsyncDriver] = {}
 
 
@@ -79,8 +80,16 @@ def get_driver(env_file: str) -> AsyncDriver:
     load_dotenv(env_file, override=False)
     uri = os.environ["BIRD_NEO4J_URI"]
     if uri not in _DRIVERS:
+        # The pool is the concurrency limit on the database: a training batch can issue well over a
+        # hundred queries at once against a single local instance. Excess queries wait here for a
+        # connection instead of timing out inside the database, where a timeout would reach the
+        # model as an error and change its reward. The server-side transaction timeout only starts
+        # once a query actually runs.
         _DRIVERS[uri] = AsyncGraphDatabase.driver(
-            uri, auth=(os.environ["BIRD_NEO4J_USER"], os.environ["BIRD_NEO4J_PASSWORD"])
+            uri,
+            auth=(os.environ["BIRD_NEO4J_USER"], os.environ["BIRD_NEO4J_PASSWORD"]),
+            max_connection_pool_size=MAX_CONCURRENT_QUERIES,
+            connection_acquisition_timeout=1800,
         )
     return _DRIVERS[uri]
 

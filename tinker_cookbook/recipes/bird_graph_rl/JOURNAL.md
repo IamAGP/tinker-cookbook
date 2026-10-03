@@ -489,3 +489,27 @@ recommended renderer, LoRA rank 32, `importance_sampling` loss, no KL penalty, l
 cookbook's guidance), 16 groups × 8 rollouts, constant-reward groups removed.
 **Blocked on:** natural-language questions for generated instances (stage B), and the owner's
 confirmation of the student model. The smoke run is billed and creates a checkpoint, so it waits.
+
+## 2026-10-03 — the reward is blind to the student's largest failure class (verified)
+
+The Fireworks agent applied the pinned reward to the 9B baseline's stored queries; I reproduced
+it: mean partial credit 0.452 vs strict 0.425; **of 107 failures, 9 get any credit and 98 get
+exactly 0; of the 31 "right values, wrong shape" failures, 0 get any credit** (an extra column
+means no whole row matches). I had written that shape errors were "the cheapest kind of error
+for RL to remove". That holds only if some rollouts in a group already return the right shape;
+the reward itself gives a wrong-shape answer nothing. Not changing the reward on this evidence —
+a tier for "a subset of columns matches" invites wide-row farming — but the smoke run must
+report the fraction of groups removed as constant and per-group reward spread.
+
+**Decisions taken before any checkpoint exists:**
+- `train_unembed=False` (SDK default is True; `rl.train` does not expose it, so `train.py` applies
+  it where the training client is created). Reason: per the Fireworks agent's reading of that
+  platform's docs, adapters for this model family are accepted there only without an unembedding
+  adapter, so this keeps a Tinker-trained adapter deployable elsewhere. Effect on task performance
+  is unmeasured.
+- Database concurrency capped at 24 connections in the driver, with a long acquisition wait, so
+  a 128-rollout batch queues for the local database instead of producing timeout errors that
+  would reach the model and alter rewards.
+- `env_file` is now a CLI field.
+- Steps will be set from budget (`max_steps`), not dataset size; checkpoint selection happens
+  after the run on a fixed generated set of ≥200, not on the 64-question in-loop monitor.
