@@ -1222,3 +1222,27 @@ steps of the run 1 arm on its unused training questions. Not launched; needs its
 and the owner's go-ahead on spending most of the remaining $45.78. The hints (82% of ours explain
 a term the question never uses, against 2.2% of human ones) are the named next suspect for the
 missing transfer of substance, and that rule's branch does not test them.
+
+**E9 correction to my own reading (2026-10-03, after the Fireworks agent reproduced the result
+and I re-tallied her counts).** Under "What the two runs agree on" I wrote that the falling gap
+between lenient and strict (0.1532 → 0.1102 → 0.0766) shows a gain in form in both runs. That
+holds for run 1 and **not for run 2**. Samples by outcome, 744 per arm (186 × 4):
+
+| | strict | lenient only | wrong | wrong at the turn cap | no query |
+|---|---|---|---|---|---|
+| baseline | 313 | 114 | 192 | 125 | 0 |
+| run 1 | 347 | 82 | 213 | 102 | 0 |
+| run 2 | 354 | 57 | 224 | 108 | 1 |
+
+Baseline → run 1: lenient-only −32, strict +34 — consistent with answers of the wrong shape
+being repaired. Run 1 → run 2: lenient-only −25 but strict only +7; the other 18 are now wrong
+(+11), at the turn cap (+6) or without a query (+1), and 18 / 744 = 0.0242 is the whole lenient
+drop. So in run 2 the gap shrank mostly because near-misses became misses, not because they
+became correct. These are net flows between arms, not transitions of individual samples.
+Her inference from the worst cases (not measured): the lost answers have different row counts
+from the reference where run 1 had the right count, i.e. wrong substance, not formatting.
+Also noted: run 2's first pass is an outlier on lenient (0.608 against 0.538, 0.532, 0.532);
+cause not examined. Her reproduction of every figure in the result tables agrees to four
+decimals on point estimates; intervals differ in the third decimal by generator.
+**Statement that stands for the write-up:** on human questions, run 1 fixed form and left
+substance flat; run 2 has the same strict accuracy within noise and lost some substance.
