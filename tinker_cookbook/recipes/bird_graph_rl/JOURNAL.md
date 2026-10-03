@@ -955,3 +955,26 @@ what was asked for; it did not learn to answer more questions.
 0.27 of one. A threshold on a point estimate clears only about half the time when the true
 effect sits on it. That is a property of the bar we signed, stated as a fact about it and for no
 other purpose: the bar was read once and is not re-read.
+
+### E7 reading, corrected — the reward is not what limits substance
+
+I proposed that the two suspects divide the blame: the question mix explains why generated-data
+skill does not carry to human questions, and the reward's blindness to shape explains why what
+carries is form. The Fireworks agent tested the second half with data already on disk, and it
+fails. If the reward could only teach form, the gain would be mostly form everywhere.
+
+| question set | strict gain | lenient (substance) gain, 95% interval | substance share |
+|---|---|---|---|
+| generated, seen structures (264) | +0.174 | +0.102 [+0.042, +0.163] | ~59% |
+| generated, unseen structures (360) | +0.153 | +0.117 [+0.058, +0.178] | ~76% |
+| human, the 186 (four samples) | +0.046 | +0.003 [−0.031, +0.036] | ~6% |
+
+The same reward taught the policy to get 10 to 12 more points of answers right *in values* on
+generated questions, including on structures it never trained on. On human questions that gain
+is absent. So form — "return what was asked and nothing else" — is a habit that crossed between
+question styles, and substance was learned for the kinds of question the generator writes and
+did not cross. That is the distribution explanation doing all the work. **My statement that a
+second run fixing only the question mix would leave a reward problem in place is withdrawn:** on
+this evidence a change to the reward is aimed at the wrong thing, and a change to the question
+mix at the right one. The shares on generated sets are single-sample point estimates and are to
+be quoted as approximate; the direction is not in doubt, since both lenient intervals exclude zero.
