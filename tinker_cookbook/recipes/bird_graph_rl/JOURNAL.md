@@ -305,3 +305,41 @@ single-sample noise at these n.
 cached). Tinker $2.33 by console. The gap is most likely prefix-cache hit rate (my arithmetic
 implies roughly 75–78% cached on Tinker) — **unconfirmed**: Tinker billing usage for
 18:00–20:00 UTC had no sampling events yet when queried (documented lag of a few hours).
+
+## 2026-10-03 — partial-credit reward measured (free, no sampling): it helps less than I claimed
+
+`reward.py` grades a rollout by **row-level F1** between the rows its final Cypher returns and
+the reference rows, returning exactly 1.0 only when the strict scorer would. No judge, no
+vendor, deterministic. Deliberately excludes any "mentioned the right value" term — an earlier
+project on another graph found that teaches entity-echoing without computing.
+
+Measured by re-executing every stored `final_query` from both baseline runs (372 queries) against
+the live graph. Nothing was sampled; this cost nothing.
+
+| | Tinker | Fireworks |
+|---|---|---|
+| strict (binary) | 0.608 | 0.608 |
+| mean partial credit | 0.639 | 0.642 |
+
+**The number that matters, and it is not flattering to my proposal:**
+
+| | value |
+|---|---|
+| never-solved set (strict 0 in both runs) | 52 |
+| of those, non-zero partial credit in at least one run | **13 (25%)** |
+| of those, still exactly 0 | **39** |
+| questions with reward spread across the 2 samples, binary | 42 / 186 |
+| questions with reward spread across the 2 samples, partial credit | **47 / 186** |
+
+**Reading.** Partial credit converts 5 more questions from flat to graded, and lifts mean
+reward by 0.03. That is a real but small gain, and it does **not** solve the flat-reward
+problem: 39 of the 52 hardest questions return rows with *zero* row overlap with the reference.
+Those are not near misses — the query is semantically wrong, so there is nothing partial to
+credit. I previously argued partial credit was the cheap fix that made a learned judge
+unnecessary for shaping. On this evidence that argument is too strong, and the judge arm has a
+real gap to aim at. Partial credit is still worth adopting because it is free and strictly
+better than binary, but it is not the answer to the dead-group problem.
+
+**Important caveat on the "52".** It was measured at k=2. GRPO will use a group of 8, where more
+questions will produce mixed outcomes, so 52 is an upper bound on dead questions, not an
+estimate. This should be re-measured at the k we settle on before designing around it.
