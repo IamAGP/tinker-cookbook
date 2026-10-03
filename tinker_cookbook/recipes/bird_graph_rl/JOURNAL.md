@@ -1042,3 +1042,26 @@ held-out-structure questions as run 1, one sample each.
    would not count against the hypothesis and is reported as it comes.
 **Cost bound.** Training at most 37 steps; run 1's training was estimated at $35.09 and billed
 about a quarter less. Evaluations estimated at $9. Console balance before: $83.04.
+
+**E9 pre-registration, revised after review by the Fireworks agent — still before any run-2 data
+has been used or any run started (2026-10-03).** Four changes; the earlier E9 text is superseded
+where it differs.
+1. **The confirmatory test is run 2 against run 1, not against the baseline.** The hypothesis is
+   that the question mix matters; a run with any mix might move lenient accuracy a little. So the
+   test is the paired difference in *lenient* accuracy on the 186 between run 2 and run 1, each
+   at four samples: interval above zero → supported; otherwise not supported by this run. Run 2
+   against the baseline remains the test of the bar and is reported as a separate result.
+2. **Stated limitation: one run per arm cannot separate the mix from run-to-run variance.** Two
+   runs on the same data with different seeds would not score identically on the 186, and that
+   spread has never been measured here. A win for run 2 is what the hypothesis predicts and also
+   what seed noise could produce. If budget remains, a repeat of run 1's data with a different
+   seed is the measurement that would settle it.
+3. **Three things differ between the runs, not one:** the training file; the 45 s per-query limit
+   in training, which also bounds the reward's uncapped re-execution of the final query (evidence
+   that it is immaterial: no call in run 1 finished between 30 s and the limit, and no rescore
+   failed in any of 37 steps); and how the evaluated checkpoint is chosen (run 1: best on
+   held-out instances, which was the last step; run 2: the last step, fixed in advance).
+4. **Step 30 is evaluated on the generated sets only**, as a descriptive check in case step 37
+   lands on an anomalous update. It is never evaluated on the 186.
+Also recorded: the "how many" target is one combined figure of about 28%, and the 10% of
+training questions at 3–4 hops is a declared departure from the human 4.2%.

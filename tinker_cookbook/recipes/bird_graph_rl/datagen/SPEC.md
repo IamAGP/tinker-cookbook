@@ -218,3 +218,17 @@ that also appears in a held-out set.
 **Report** (`out/v4/report.json` and the README): achieved shares beside each target, computed;
 counts of reused and new structures; and explicit checks that no v4 training structure equals a
 held-out signature and that no held-out component was introduced.
+
+## Notes on amendment D (2026-10-03, from review) — binding
+- **"How many" is one target, not two.** The split between plain count (25%) and count distinct
+  (3%) in the human figures is how SQL expresses counting; over a graph traversal the correct
+  query often needs `DISTINCT` where the SQL did not. Target **"how many" questions at about 28%
+  combined** and let each query use whichever form is correct. The same caution applies, more
+  weakly, to the 9% for distinct projection, which in SQL often compensates for join duplication:
+  treat it as a ceiling, not a quota.
+- **Depth is a deliberate departure.** About 10% at 3–4 hops is deeper than the human set (4.2%);
+  it is kept so the policy still practises deep traversal, and is declared as a departure.
+- The human hop figures are an approximation in both directions, not an upper bound: dropping a
+  junction table removes a hop, but modelling a column as a node (tags) adds one.
+- Write the explicit list of new training structures (id and signature) to
+  `out/v4/new_structures.json`, so the two held-out checks can be reproduced by another agent.
