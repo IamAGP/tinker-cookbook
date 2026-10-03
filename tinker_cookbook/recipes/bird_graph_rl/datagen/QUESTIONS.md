@@ -26,3 +26,7 @@
    human ambiguity/grammar review is still needed before scaling. Quoted real
    names/titles may contain camel case or otherwise banned ordinary words; those
    data literals are preserved and excluded from syntax-token validation.
+
+## Owner answers applied in amendments C
+
+Scalar answers need no width quota. Novelty is exact for the defined components. No artificial family is needed to preserve counts. B5 supersedes A5 and hints belong on instances. Runtime rejections remain nondeterministic. Independent review belongs to the team.

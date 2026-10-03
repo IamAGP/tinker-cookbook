@@ -690,3 +690,31 @@ Instead: 8 groups × 8 rollouts, staged — 20 steps (estimated $23.20, 160 ques
 40 (estimated $46.40, 320 questions) only if the reward curve is rising and the bill agrees with
 the estimate. Learning rate 1e-5 is inside the cookbook's own guidance for RL (1e-5 to 4e-5;
 its multi-turn RL example uses 1e-5), checked today in `skills/research`.
+
+### E4a correction, second time — the segment model is also wrong; training is one datum per turn
+
+After withdrawing 1.06 datums per trajectory I replaced it with about 3.9, counting a new datum
+only where the next prompt was *shorter* than the previous prompt plus action. The Fireworks
+agent pointed out that this is a necessary condition for merging, not a sufficient one: the
+renderer removes earlier reasoning (shortening the prompt) and appends a tool result
+(lengthening it), so a prompt can be longer and still not contain the previous sequence.
+**Verified.** `rl/train.py` prints one marker per datum returned by `assemble_training_data`,
+the trainer's own function. The printed group that matches unambiguously — iteration 0, group 0,
+rewards 0.237/0/0/0 with 7/8/8/8 turns — prints 7/8/8/8 datums; my segment model says 3/5/6/4.
+So the datum count is the turn count. **I have now been wrong twice on this one number**, both
+times by inferring from a proxy instead of reading the code that produces it.
+**Figures to use:** $1.404 per 64-rollout step at list prices (sampling $0.659 and $0.546,
+training $0.947 and $0.656 in the two steps); the smoke run cost an estimated $2.81; 20 steps of
+8 × 8 is $28.08 and 40 steps is $56.16. The $23.20 and $46.40 figures above are withdrawn.
+Billed training tokens for the smoke are expected near 1,095,448; the bill has the last word.
+
+### E5 RESULT — four-sample zero-shot baseline, Qwen3.5-9B on the 186 (2026-10-03)
+
+Per-pass strict 0.425, 0.419, 0.419, 0.419 (lenient 0.591, 0.554, 0.565, 0.586).
+**Per-question mean over four samples: 0.4207, 95% bootstrap interval 0.363 to 0.481.**
+Simple 0.477 (151), moderate 0.183 (30), challenging 0.150 (5).
+Solved in 0/1/2/3/4 of four samples: 72 / 28 / 21 / 17 / 48 — so 66 questions are mixed, 72 never
+solved, 48 always solved. Upper-bound cost of the four passes $4.16.
+This is the "before" number the pre-registered bar is defined against. A gain needs a point
+estimate of at least 0.4707 after training with an interval on the paired difference above zero;
+the reference is 0.608 (single sample of the 27B on each platform).

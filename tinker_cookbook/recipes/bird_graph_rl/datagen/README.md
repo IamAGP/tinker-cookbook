@@ -189,3 +189,13 @@ for that next stage, but pilot grammar and human plausibility still need an
 independent review rather than a claim of statistically verified naturalness.
 
 Filter-use audit: {"year/date range": 1093, "equality on name": 2905, "IS NOT NULL": 170, "equality on id": 731, "label test:Answer": 1226, "label test:Question": 1130, "string CONTAINS": 103, "numeric range": 127, "string STARTS WITH": 115, "IS NULL": 204}; numeric-ID share of all filter uses: 9.37%.
+
+## Checkpoint: C2/C3 replay complete
+
+All 133 independent saved-instance executions matched, covering 32 paths and all retained rendering modes, including each new C3 shape and the existing 60 pilot bindings. Hints refreshed: 4,594 / 4,982 instances. One new test initially asserted a literal count(DISTINCT) implementation; the query actually deduplicates identities before count(*), so the assertion was corrected to that equivalent implemented form. Unit suite rerun next. Step 2 queue is persisted; all training instances come first, round-robin by structure to prevent consecutive paraphrase writing.
+
+## Question batch checkpoint
+
+{"batch_size": 100, "batch_start": 0, "questions_by_split": {"train": 100}, "questions_total": 100}
+
+Questions are separately authored in the numbered batch module, with shared helpers only for exact data literals and subject descriptions. Next: continue the persisted training queue before either held-out split.
