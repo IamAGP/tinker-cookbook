@@ -11,7 +11,9 @@ training-data generation). Research questions go to sub-agents restricted to off
 
 **Rules.** Official sources only. Shared code is imported and pinned by git blob hash, never
 re-implemented from prose. BIRD's 186 questions are evaluation only and are never read by the
-data generator. Preflight, opening balance and a cost stop before anything billed.
+data generator. Preflight, opening balance and a cost stop before anything billed. **Every number is computed with a
+tool** — measured, or calculated by a script from stated inputs and labelled an estimate — never
+mental arithmetic or a predicted quantity, in messages between agents as much as in reports.
 
 ## Done
 - D1 Graph built and reconciled: 649,846 nodes / 1,380,394 relationships.
