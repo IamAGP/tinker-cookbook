@@ -1267,3 +1267,19 @@ from the Fireworks agent's own journal. For the record of what that arm is: the 
 trained on Fireworks on this account (dedicated hardware was refused for lack of a payment
 method), so with the owner's go-ahead the run 1 recipe is being applied there to Qwen3.8-27B on
 serverless — a different student, so not a platform replication of the runs in this journal.
+
+**State at pause (2026-10-03, late evening). The owner is away for a couple of days: no
+experiments until he returns.** Nothing is running and nothing billed is pending.
+- Tinker balance $45.78 (console, 17:10). Next run not chosen: the pre-fixed rule says 37 more
+  steps of the run 1 arm; the alternative is the hint experiment; or stop and write.
+- A consequence of the Fireworks agent's result for this journal's reading (her rows W15–W20,
+  reproduced here from her result folders): Qwen3.8-27B trained on the same data with the same
+  recipe gains +0.0739 [+0.0376, +0.1102] strict on the 186, more than the 9B's +0.0457, although
+  it had less wrong-shape output to fix. So "only form transfers" is not the only reading of the
+  9B result; that the 9B has less capacity to use what this data teaches is at least as
+  plausible. Her result still lacks a control for the serving route of the trained adapter.
+- No loss value was recorded for runs 1 and 2 (the upstream loop does not log the training
+  call's output); capture it before any further run.
+- To do on return, none of it billed: quote the objective from the official documentation;
+  choose worked examples by a stated rule; replace the one-sample 27B reference (0.608) in the
+  draft with a four-sample figure once agreed which platform's to cite.
