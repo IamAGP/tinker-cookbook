@@ -143,3 +143,23 @@ Redo the pilot (60 questions) under B1–B6 before scaling, and report how many 
   split is frozen: every dropped structure's intent sentence is read, and a sample of the kept
   ones, by a person or another agent. An independent check also compares the coarse shapes kept
   and dropped against the shapes people ask in a human-written question set from other databases.
+
+## Amendments C (2026-10-03, from an independent measurement of human-written questions) — binding
+Evidence: 6,601 human-written question–SQL pairs from BIRD's official filtered training split
+(69 other databases; none is the evaluation database), classified by coarse shape by another
+agent, 0 unclassified. This is *not* the evaluation set. Figures are relational hops (table
+references minus one), an upper bound on graph hops.
+
+- **C1 corrects B4 on return shapes.** People ask for a single column 83.9% of the time and two
+  columns 12.1%. A single-column answer is normal; do **not** widen returns for variety. What was
+  wrong in the first output was the fixed alias, not the width. Keep semantically named columns.
+- **C2 Weight instances toward what people ask.** In that human set 21.4% of questions need 0
+  hops, 57.6% need 1, 16.8% need 2, 3.5% need 3 and 0.67% need 4 or more. The first output had
+  15.0% of its instances at ≤1 hop and 52.0% at 3–4 hops. Keep every structure that survives B3,
+  but allocate **instances** so that at least half of the training instances are at ≤1 hop and
+  3–4 hop instances are at most 15% of the training set. Deep structures remain essential for
+  the held-out-structure analysis; they should not dominate what the policy practises.
+- **C3 Shapes people ask that the structure tuple should express:** the n-th ranked item
+  (`ORDER BY … SKIP n LIMIT 1`), conditional aggregates (counting or summing under a condition
+  inside one query), and a DISTINCT projection as opposed to `count(DISTINCT …)`. A `LIMIT`
+  without an order stays excluded: it is non-deterministic.

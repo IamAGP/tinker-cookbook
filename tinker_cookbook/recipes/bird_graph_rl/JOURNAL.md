@@ -533,3 +533,21 @@ Training on this would teach a distribution unlike the evaluation set. Amendment
 decided per structure before the split with removals reported by component, varied anchors and
 return shapes, deterministic hints at the evaluation rate, non-templated question writing. The
 pilot is to be redone before anything is scaled. Usable training-set size is unknown until then.
+
+## 2026-10-03 — independent evidence on what people ask; one of my instructions was backwards
+
+The Fireworks agent classified 6,601 human-written question–SQL pairs from BIRD's official
+filtered training split (69 databases, the evaluation database not among them; 0 unclassified;
+labels cross-checked by a second method with 10 disagreements, all one construct). Ledger F40–F43.
+- **Anchors:** people filter on a string in a non-id column 77.1% of the time and on a numeric
+  id 6.4%. This supports the direction of amendment B4 from evidence that is not the evaluation set.
+- **Return width — my B4 was wrong in direction.** People ask for a single column 83.9% of the
+  time. I had told the generator to vary away from single-column returns. The fault in the first
+  output was the fixed alias, not the width. Corrected in amendment C1.
+- **Depth:** 79.0% of human questions need at most one relational hop (an upper bound on graph
+  hops). The first generated output had 15.0% of instances at ≤1 hop and 52.0% at 3–4 hops.
+**Position changed, with the evidence above:** I had said the generated distribution would not be
+tuned toward this measurement. A training set that is 15% shallow against human asks that are
+79% shallow is a mismatch large enough to matter for a milestone judged on human-written
+questions, so amendment C2 weights *instances* toward shallow structures while keeping every
+deep structure for the held-out analysis. The source is an independent human set, not the 186.

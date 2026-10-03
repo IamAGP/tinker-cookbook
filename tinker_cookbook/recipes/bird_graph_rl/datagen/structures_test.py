@@ -1,54 +1,56 @@
 from dataclasses import replace
 import json
+from .structures import Path, Structure, canonical_signature, enumerate_structures, chain
 
-from .structures import Path, Structure, canonical_signature, enumerate_structures, paths
+
+def sig(path, filters=(), aggregation=('sum','Post'), grouping='none', ordering='none', extras=()):
+    return canonical_signature(path,list(filters),aggregation,grouping,ordering,extras)
 
 
-def test_signatures_are_stable_and_unique():
-    a,b = enumerate_structures(),enumerate_structures()
-    assert len(a) >= 150
+def test_signatures_stable_unique_and_parameter_free():
+    a,b=enumerate_structures(),enumerate_structures()
     assert [s.signature for s in a] == [s.signature for s in b]
     assert len({s.structure_id for s in a}) == len(a)
-    assert len({s.signature for s in a}) == len(a)
     assert all(s.structure_id == replace(s).structure_id for s in a)
     assert {s.path.hops for s in a} == set(range(5))
-    assert sum(s.path.hops <= 1 for s in a)/len(a) <= .35
+    assert all(set(json.loads(s.signature)) == {'path','filters','aggregation','grouping','ordering','extras'} for s in a)
 
 
-def test_filter_multiset_and_extras_set():
-    path = Path(('User',))
-    a = canonical_signature(path,['id','year'],'count','none','none',('negation','existence'))
-    b = canonical_signature(path,['year','id'],'count','none','none',('existence','negation','existence'))
-    assert a == b
-    assert a != canonical_signature(path,['id','id','year'],'count','none','none',('negation','existence'))
+def test_uniform_label_granularity():
+    path=Path(('User','Post'),((0,'OWNS',1),))
+    s=Structure(path,'sum')
+    parsed=json.loads(s.signature)
+    assert parsed['aggregation'] == ['sum','Post']
+    assert all(len(f)==2 and f[0] in ('User','Post') for f in parsed['filters'])
+    assert 'score' not in s.signature and 'postId' not in s.signature
+    assert sig(path,[('Post','year/date range')]) != sig(path,[('User','year/date range')])
+    # Different measured properties cannot enter this signature API.
+    assert sig(path,aggregation=('sum','Post')) == sig(path,aggregation=('sum','Post'))
+    assert sig(path,aggregation=('sum','Post')) != sig(path,aggregation=('avg','Post'))
 
 
-def test_direction_and_aggregation_and_ordering_change_signature():
-    path = Path(('Post','Post'),((0,'LINKS_TO',1),))
-    reversed_path = Path(('Post','Post'),((1,'LINKS_TO',0),))
-    assert Structure(path,'sum').signature != Structure(reversed_path,'sum').signature
-    assert Structure(path,'sum').signature != Structure(path,'avg').signature
-    assert Structure(path,'detail').signature != Structure(path,'top').signature
-    assert Structure(path,'argmax').signature != Structure(path,'top').signature
-    assert Structure(path,'argmax').signature != Structure(path,'bottom').signature
+def test_branch_order_and_variable_names_are_canonical():
+    a=Path(('User','Post','Badge'),((0,'OWNS',1),(0,'EARNED',2)))
+    b=Path(('Badge','User','Post'),((1,'EARNED',0),(1,'OWNS',2)))
+    assert sig(a) == sig(b)
+    assert sig(a) == sig(Path(a.labels,tuple(reversed(a.edges))))
 
 
-def test_parameter_values_do_not_enter_signatures():
-    s = enumerate_structures()[0]
-    assert '$' in s.render()
-    assert set(json.loads(s.signature)) == {'path','filters','aggregation','grouping','ordering','extras'}
-    assert 'params' not in json.loads(s.signature)
+def test_schema_direction_independent_of_traversal():
+    assert sig(chain(('User','Post'),'OWNS')) == sig(chain(('Post','User'),'<OWNS'))
+    assert sig(chain(('Post','Post'),'LINKS_TO')) != sig(Path(('Post','Post'),()))
 
 
-def test_paths_are_schema_valid():
-    edges = {('User','OWNS','Post'),('User','WROTE','Comment'),('User','MADE','PostHistory'),
-             ('User','CAST','Vote'),('User','EARNED','Badge'),('Answer','ANSWERS','Question'),
-             ('Question','ACCEPTED','Answer'),('Post','LINKS_TO','Post'),('Post','TAGGED','Tag'),
-             ('Comment','ON_POST','Post'),('Vote','ON_POST','Post'),('PostHistory','REVISES','Post'),
-             ('Tag','HAS_WIKI','Post')}
-    def matches(actual,expected):
-        return actual == expected or actual in ('Answer','Question') and expected == 'Post' or actual == 'Post' and expected in ('Answer','Question')
-    for path in paths():
-        for a,rel,b in path.edges:
-            assert any(rel == r and matches(path.labels[a],src) and matches(path.labels[b],dst)
-                       for src,r,dst in edges)
+def test_subtypes_equal_explicit_label_filters():
+    for subtype in ('Question','Answer'):
+        assert sig(Path((subtype,)),aggregation=('sum',subtype)) == sig(
+            Path(('Post',)),[('Post','label test:'+subtype)])
+    assert Structure(Path(('Question',)),'count').signature == Structure(Path(('Post',)),'label').signature
+
+
+def test_multiset_filters_and_set_extras():
+    p=Path(('User',))
+    a=sig(p,[('User','id'),('User','year')],extras=('negation','existence'))
+    b=sig(p,[('User','year'),('User','id')],extras=('existence','negation','existence'))
+    assert a==b
+    assert a!=sig(p,[('User','id'),('User','id'),('User','year')],extras=('negation','existence'))

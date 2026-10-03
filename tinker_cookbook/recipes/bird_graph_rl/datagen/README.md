@@ -1,3 +1,13 @@
+# Amendment checkpoint
+
+A1–A3 implemented and unit-tested: uniform label granularity; canonical branches,
+schema directions and subtype filters; exact component and combination holdouts.
+The old output counts below describe the PRE-AMENDMENT run and must not be used
+for the amended experiment. See `out/checkpoint_a.json`.
+
+Next: B3 naturalness filtering; B4 anchors and returns; regenerate and replay;
+B5 hints; B1/B2/B6 pilot rewrite.
+
 # Query-first data generation (stage A)
 
 Run from the repository root, using only installed dependencies:
@@ -61,7 +71,7 @@ answers: the reader collects 201 rows and rejects the entire instance.
    would understate branching complexity. Node positions and directed edges are
    explicit in the path portion of the signature.
 2. **Instance holdout:** select about 20% of retained structures within each hop
-   stratum as `heldout_structure`. Reserve two instances per remaining structure
+   stratum as `heldout_structure`. Reserve up to two instances per remaining structure
    for `heldout_instance`, leaving at least two training instances. Their complete
    parameter dictionaries differ from all training dictionaries for that
    structure. Structure splits happen after filtering, so rejected structures
@@ -124,3 +134,74 @@ does not get an existence test for that same attachment. Subtype filters are
 used on generic contributions rather than on already fixed subtypes. Argmax
 returns the winning entity and measurement, whereas max returns only the scalar
 measurement; both selection directions receive the strict boundary-tie check.
+
+
+## Final measured result (seed 20261003)
+
+All targets were met: **469 retained structures and 5,590 verified instances**
+from 532 enumerated structures. Exactly 72/469 (15.35%) have at most one hop.
+No graph writes, evaluation access, dependency installation, commit, or push was
+performed.
+
+| Hops | Structures | Instances |
+|---|---:|---:|
+| 0 | 16 | 181 |
+| 1 | 56 | 672 |
+| 2 | 151 | 1,812 |
+| 3 | 122 | 1,449 |
+| 4 | 124 | 1,476 |
+
+Structure split: 376 training structures, 93 held-out structures.
+Instance split: 3,723 train, 751 heldout_instance, 1,116 heldout_structure.
+One small training structure reserves one rather than two instances so that at
+least two remain in training. Parameter-set holdouts share their parent structure
+with training; structure holdouts never do.
+
+Structures by aggregation: none 112, count 132, count distinct 24, sum 85, avg 65,
+min 24, max 27. Corresponding instance counts: none 1,326, count 1,575, count
+distinct 288, sum 1,020, avg 769, min 288, max 324.
+
+Structures by extra: existence 6 (including 3 negated), negation 3, percentage 8,
+difference of aggregates 5, named comparison 16, HAVING 21. Instance counts:
+existence 72, negation 36, percentage 96, difference 60, comparison 192, HAVING 243.
+Extras overlap; these are membership counts, not a partition.
+
+Rejections: row count 2,328; all-null 1,831; primary cut-boundary tie 821;
+constant answer 4,095 accepted observations discarded across rejected structures;
+no sampled parameters 2 structures. Execution errors, time-limit failures,
+unstable results, ambiguous names, and sampling errors were all zero in the final
+run. Unique-name sampling prevents ambiguous names from reaching execution.
+An earlier percentage denominator error was reproduced and fixed; the diagnostic
+is retained in `out/ratio_diagnosis.json`. Original failure `/ by zero` is converted
+to an all-null answer when no routes exist, then rejected by the ordinary rule.
+
+**Validation:** 16 database-free unit tests passed. Exhaustive checks of every
+artifact instance passed. **127 independently re-executed examples** matched
+exactly, covering all 32 paths, all 24 rendering modes, all five hop counts,
+and **all 60 pilot bindings**. Inspection also rechecks unique names and primary
+sort-key cut boundaries. The pilot has twelve individually authored prompts per
+hop count and names the exact requested columns. A case-insensitive whole-word
+lexical audit found no labels, relationship identifiers, or property names in
+its 60 questions. Prompts and bindings were manually reviewed for requested
+aggregation, ordering, missingness, repeated-route weighting, and scope.
+
+## Stage B scaling limitations
+
+A loop that substitutes parameters into these 60 prompts would violate the
+no-paraphrase-template requirement and encourage memorisation. Scaling needs
+fresh questions plus independent ambiguity checks, particularly for branched
+paths, distinct entities versus repeated routes, snapshot counters versus derived
+counts, ratios' denominators, numeric/calendar interval inclusivity, and missing
+values. Requests for a scalar maximum and requests for its winning entity must
+remain distinct. Human-facing synonyms required by the literal identifier ban
+need consistency checks: standing points and point totals are different metrics.
+Answers must be bound to the actual requested return columns and compared with
+the declared multiset semantics; a model's incidental response order must not
+change scoring.
+
+The current artifacts depend on an unchanged graph. Graph edits invalidate saved
+answers, uniqueness checks, and cut-boundary proofs, and therefore require
+regeneration. Runtime fields and five-second acceptance cannot be perfectly
+reproducible on a machine under changing load. These are explicit limitations,
+not evidence that any current target was missed. There is no billed-model stage
+or full stage-B natural-language generation in this implementation.

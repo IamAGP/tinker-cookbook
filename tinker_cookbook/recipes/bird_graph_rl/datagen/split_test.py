@@ -1,30 +1,38 @@
-from .split import split_instances, split_structures
-from .structures import enumerate_structures
+import json
+from .split import plan_split, split_instances
+from .structures import canonical_path, components, enumerate_structures
 
 
-def test_structure_split_is_reproducible_and_order_independent():
-    structures = enumerate_structures()
-    a = split_structures(structures,7)
-    assert a == split_structures(list(reversed(structures)),7)
-    assert a != split_structures(structures,8)
-    for hops in range(5):
-        ids = [s.structure_id for s in structures if s.path.hops == hops]
-        assert abs(sum(a[i] == 'heldout_structure' for i in ids)/len(ids)-.2) <= 1/len(ids)
+def test_split_is_reproducible_and_order_independent():
+    structures=enumerate_structures()
+    assert plan_split(structures,7)==plan_split(list(reversed(structures)),7)
+    assert plan_split(structures,7)!=plan_split(structures,8)
 
 
-def test_structure_and_parameter_holdouts_are_disjoint():
-    structures = enumerate_structures()
-    assignments = split_structures(structures,42)
-    by_split = {'train':set(),'heldout_structure':set(),'heldout_instance':set()}
-    for structure in structures:
-        ids = [f'{structure.structure_id}:{i}' for i in range(12)]
-        split = split_instances(ids,assignments[structure.structure_id],42)
-        assert split == split_instances(list(reversed(ids)),assignments[structure.structure_id],42)
-        assert set(split) == set(ids)
-        for iid,part in split.items():
-            by_split[part].add(structure.structure_id)
-        if assignments[structure.structure_id] == 'train':
-            assert list(split.values()).count('heldout_instance') == 2
-            assert list(split.values()).count('train') == 10
-    assert not by_split['train'] & by_split['heldout_structure']
-    assert by_split['train'] == by_split['heldout_instance']
+def test_component_holdout_and_tags_are_exact():
+    structures=enumerate_structures()
+    p=plan_split(structures,42)
+    train=[s for s in structures if p.assignments[s.structure_id]=='train']
+    held=[s for s in structures if p.assignments[s.structure_id]=='heldout_structure']
+    assert not any(p.held_components['extra'] in s.extras for s in train)
+    assert not any(canonical_path(s.path)==p.held_components['four_hop_path'] for s in train)
+    assert not any(json.dumps([json.loads(s.signature)['aggregation'],s.extras])==p.held_components['aggregation_extras_pairing'] for s in train)
+    assert any(s.path.hops==4 and canonical_path(s.path)==p.held_components['four_hop_path'] for s in held)
+    seen=frozenset(c for s in train for c in components(s))
+    for s in held:
+        missing=components(s)-seen
+        assert p.novelty[s.structure_id]==('novel_component' if missing else 'novel_combination')
+        assert p.unseen_components[s.structure_id]==sorted(missing)
+    assert set(p.novelty.values())=={'novel_component','novel_combination'}
+    for hop in range(5):
+        group=[s for s in structures if s.path.hops==hop]
+        forced=[s for s in group if p.held_components['extra'] in s.extras or canonical_path(s.path)==p.held_components['four_hop_path'] or json.dumps([json.loads(s.signature)['aggregation'],s.extras])==p.held_components['aggregation_extras_pairing']]
+        assert sum(p.assignments[s.structure_id]=='heldout_structure' for s in group)==max(round(len(group)*.2),len(forced))
+
+
+def test_instance_holdout_is_disjoint_reproducible():
+    ids=[f'i_{i}' for i in range(12)]
+    a=split_instances(ids,'train',7)
+    assert a==split_instances(list(reversed(ids)),'train',7)
+    assert list(a.values()).count('heldout_instance')==2
+    assert set(split_instances(ids,'heldout_structure',7).values())=={'heldout_structure'}

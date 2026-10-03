@@ -51,6 +51,13 @@ def main() -> None:
         if mode not in seen:
             sample.append(i)
             seen.add(mode)
+    # Cover every retained path, including shared-root branches.
+    seen_paths = {known[i['structure_id']].path for i in sample}
+    for i in instances:
+        path = known[i['structure_id']].path
+        if path not in seen_paths:
+            sample.append(i)
+            seen_paths.add(path)
     # Replay every pilot binding too, independently of the stratified sample.
     pilot_path = out/'pilot_questions.jsonl'
     pilot_ids = {json.loads(line)['instance_id'] for line in pilot_path.read_text().splitlines()} if pilot_path.exists() else set()
@@ -79,7 +86,7 @@ def main() -> None:
     write_jsonl(out/'inspection.jsonl',checks)
     summary = {'artifact_integrity':'passed','sample_size':len(checks),
                'sample_by_hop':dict(Counter(c['hops'] for c in checks)),
-               'sample_modes':sorted(seen),'pilot_replays':len(pilot_ids),'all_replays_match':True}
+               'sample_modes':sorted(seen),'sample_paths':len(seen_paths),'pilot_replays':len(pilot_ids),'all_replays_match':True}
     (out/'inspection_summary.json').write_text(json.dumps(summary,indent=2)+'\n')
     print(json.dumps(summary,indent=2))
 
