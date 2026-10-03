@@ -77,3 +77,23 @@ relationship types or property names, and must not be a paraphrase template (var
 Final message: the counts from `report.json`, the three hardest design choices you made and
 why, anything in this spec you think is wrong, and what would break if stage B were scaled to
 all instances.
+
+## Amendments (2026-10-03, from review by the Fireworks agent) — binding
+- **A1 Uniform granularity.** A signature records the *kind* and the *label it applies to*, never
+  the property: filters are `(label, kind)`, aggregation is `(kind, target label)`, grouping is
+  `(key label)`. So `sum(score)` and `sum(viewCount)` on Post share a structure; a year filter on
+  Post and one on User do not.
+- **A2 Canonical forms, unit-tested.** Branch order in multi-branch patterns is sorted; each
+  relationship is written in its schema direction regardless of how the query traverses it;
+  `:Question` / `:Answer` is canonicalised as `:Post` plus a label filter, so the two spellings
+  of the same query share one signature.
+- **A3 Two kinds of held-out structure.** `split.py` must additionally hold out some
+  **components entirely** from training — at least one `extras` kind, one 4-hop path, and one
+  (aggregation, extras) pairing — and tag every held-out structure as `novel_combination` (all
+  of its components appear in training structures) or `novel_component` (at least one never
+  does). Report counts for both. An earlier project found the first learnable and the second
+  not; this split is the main scientific figure, so it must be exact.
+- **A4 Scope note.** Signatures are defined only for generated queries. Nothing here classifies
+  the evaluation questions or model-written queries by structure.
+- **A5 Stage-B hints are undecided.** Do not invent a hint field in the pilot; write questions
+  only. (Evaluation prompts carry a hint; whether generated ones should is an open decision.)

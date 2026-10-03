@@ -31,15 +31,25 @@ data generator. Preflight, opening balance and a cost stop before anything bille
 | T6 | Multi-sample baseline, k samples per question | both | Oct 5 | paired table at k |
 | T7 | RL run 1 (verifiable reward) | Tinker agent, then Fireworks agent | Oct 7 | curve + gated checkpoint |
 | T8 | Evaluate checkpoints: BIRD 186 (k samples) + held-out structures | both | Oct 9 | gain with paired test |
-| T9 | Decision-model judge as reward (open-weights model, self-hosted) — **stretch** | Fireworks agent | Oct 12 | judge-vs-checker agreement table |
+| T9 | ~~Decision-model judge as reward~~ — **parked by the owner 2026-10-03** (revisit after milestone 1) | — | — | — |
 | T10 | Figures + blog draft (Fireworks) | all | Oct 15 | draft reviewed by owner |
 | — | Buffer | — | Oct 16–17 | — |
 
+## Milestone 1 (proposed)
+Qwen/Qwen3.5-9B: zero-shot 0.425 strict → RL on Tinker with the verifiable partial-credit reward
+→ gain toward the Qwen3.8-27B reference (0.608), judged by the pre-registered bar in `JOURNAL.md`.
+Checkpoint selection on generated `heldout_instance`; never on the 186.
+
 ## Open decisions (owner)
+0. **Student model** — proposed Qwen3.5-9B (see `JOURNAL.md` E3). On Fireworks the 9B trains only
+   on hourly dedicated GPUs and the 4B not at all, so the platforms diverge: (A) 9B on both,
+   Fireworks as one short dedicated run; (B) train on Tinker, Fireworks serves and verifies the
+   adapter; (C) ask Fireworks for credits or per-token access to 9B training first.
 1. Frontier reference model (T3) — pending official-source research.
 2. k for evaluation (T6) — proposed 4.
 3. Which model writes the natural-language questions in T2 (it becomes the "teacher").
-4. T9 go/no-go — pending feasibility research on serving the open decision model.
+4. Generated prompts carry a hint at the evaluation rate (172 of 186 evaluation questions do),
+   written deterministically from the query's own structure — proposed, not yet built.
 
 ## Cut order if we slip
 T9 → second-platform RL run → k=4 to k=2 on intermediate checks → ablations.

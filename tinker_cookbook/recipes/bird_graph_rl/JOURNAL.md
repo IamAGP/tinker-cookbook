@@ -393,3 +393,66 @@ image, health-check patch, concurrency 1) for a task that is already optional un
 deadline. If the judge experiment runs, the publisher's hosted endpoint of the same open weights
 gives identical semantics with no infrastructure; self-host only if the hosting itself is wanted
 as content. The 8,192-token cap is compatible with the planned judge input (≤30 rows, ≤3,000 chars).
+
+## 2026-10-03 — research (official sources): the model we baselined is itself near the frontier
+
+Sub-agent report from providers' own model cards, release notes and the Tinker models page.
+Release dates of Tinker-served candidates: GLM-5.3 (API 2026-08-18, weights ~08-27) ·
+**Qwen3.8-27B (2026-08-14)** · Inkling-Small (07-30) · Inkling (07-15) · Nemotron-3-Ultra (06-04) ·
+Kimi-K2.6 (04-20) · Qwen3.5-397B (02-16) · DeepSeek-V3.1 (**2025**-08-21).
+- DeepSeek-V3.1, which I had proposed as the frontier reference, is the oldest model on the list
+  by a year. The owner's objection was correct; proposal withdrawn.
+- By provider-reported agentic numbers the strongest three are GLM-5.3, **Qwen3.8-27B** and
+  Kimi-K2.6. Providers report on different benchmarks under different harnesses, so no
+  cross-vendor ranking is possible from official sources; the only comparable measurement is
+  running candidates through our own harness.
+- **Consequence.** Qwen3.8-27B is not "a smaller model below the frontier"; it is one of the
+  frontier references. Our 0.608 is therefore better read as the *reference* number.
+
+**Budget evidence pointing the same way (Fireworks agent, measured + estimated):** sampling cost
+≈ $0.016 per rollout on the 27B; a 3,200-rollout RL run is roughly $93–173 including training
+tokens, against ~$148 of Fireworks credit and ~$129 of Tinker credit. One RL run on the 27B would
+consume nearly all of either balance, leaving nothing for iteration or evaluation.
+
+**Proposal to the owner (not yet decided):** student = a genuinely small model (Qwen3.5-9B or
+Qwen3.5-4B); references = Qwen3.8-27B at 0.608 (already measured on both platforms) and
+optionally GLM-5.3 as the ceiling. This matches the stated objective and makes RL affordable.
+
+### E3 preflight — zero-shot baselines of the small candidates (same harness, same 186)
+Qwen/Qwen3.5-9B and Qwen/Qwen3.5-4B, default renderer `qwen3_5`, T=1.0, 8 turns, identical caps.
+(1) progress: one line per question. (2) incremental JSONL per question, rerun skips finished.
+(3) memory: per-question only. (4) killed at 80%: finished questions survive.
+Cost estimate from the 27B run's billed $2.33 scaled by published prices: ≈$0.85 (9B), ≈$0.45
+(4B) if token use is similar; harness stop at `budget_usd=5` each. Opening balance: $129.03 was
+the last console reading (2026-09-22); the SDK exposes no balance endpoint.
+
+### E3 RESULT — zero-shot baselines of the small candidates (2026-10-03)
+
+| model | strict | lenient | simple | moderate | challenging | turns | est. cost (upper) |
+|---|---|---|---|---|---|---|---|
+| Qwen3.8-27B (reference, E2) | 0.608 | 0.677 | 0.675 | 0.367 | 0/5 | 4.31 | $4.02 |
+| **Qwen3.5-9B** | **0.425** | 0.591 | 0.483 | 0.167 | 1/5 | 3.88 | $1.00 |
+| Qwen3.5-4B | 0.376 | 0.489 | 0.430 | 0.167 | 0/5 | 5.03 | $0.70 |
+
+Both always use the tool (no_query 0). **There is real headroom: 18 points (9B) and 23 points
+(4B) below the 27B reference.** The 9B's lenient score is 17 points above its strict score, the
+widest such gap of the three: many of its failures have the right values in the wrong shape,
+which is the cheapest kind of error for RL to remove. Single sample each, so ±~3.6 points.
+
+**Platform constraint (Fireworks agent, from Fireworks' registry and docs, ledger F18–F21):** the
+4B is not trainable on Fireworks at all; the 9B is trainable only on dedicated hourly GPUs
+(about $39/hour for trainer plus sampler), not per token. On Tinker both are per-token.
+
+**Owner direction (2026-10-03):** park the decision-model judge entirely; too many variables.
+Get to a first milestone, then decide what follows.
+**Proposed first milestone:** Qwen3.5-9B, 0.425 → RL with the verifiable partial-credit reward on
+Tinker → measured gain toward 0.608, with the pre-registered bar below.
+
+**Pre-registered success bar (proposed by the Fireworks agent, counter-signed here before any
+training):** primary metric strict on the 186, per-question mean over k samples, after minus
+before, paired bootstrap over questions (10,000 resamples, 95% interval). A gain is claimed only
+if the interval's lower bound is above 0 **and** the point estimate is ≥ 5 points; otherwise
+"no detectable gain". Headline: fraction of the gap to the reference closed. Forgetting guard:
+the simple tier must not fall by more than 3 points. Checkpoint chosen on generated
+`heldout_instance` data and evaluated once on the 186. Held-out structures reported separately
+as novel-combination and novel-component, descriptive, no bar.

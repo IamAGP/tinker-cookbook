@@ -52,6 +52,11 @@ logger = logging.getLogger(__name__)
 # Published per-million-token prices (tinker-docs models page, read 2026-09-21).
 PRICES_PER_M: dict[str, dict[str, float]] = {
     "Qwen/Qwen3.8-27B": {"prefill": 1.86, "cached_prefill": 0.372, "sample": 5.595},
+    # read 2026-10-03
+    "Qwen/Qwen3.5-9B": {"prefill": 0.66, "cached_prefill": 0.132, "sample": 1.995},
+    "Qwen/Qwen3.5-4B": {"prefill": 0.33, "cached_prefill": 0.066, "sample": 1.005},
+    "openai/gpt-oss-20b": {"prefill": 0.18, "cached_prefill": 0.036, "sample": 0.45},
+    "zai-org/GLM-5.3": {"prefill": 4.86, "cached_prefill": 0.972, "sample": 12.15},
 }
 WRITE_KEYWORDS = re.compile(r"\b(CREATE|MERGE|DELETE|DETACH|SET|REMOVE|DROP|FOREACH|LOAD\s+CSV)\b", re.I)
 STRING_LITERALS = re.compile(r"'(?:[^'\\]|\\.)*'|\"(?:[^\"\\]|\\.)*\"")
