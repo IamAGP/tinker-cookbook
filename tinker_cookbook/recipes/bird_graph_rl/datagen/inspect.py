@@ -8,7 +8,8 @@ from dotenv import dotenv_values
 from neo4j import GraphDatabase
 
 from .generate import HERE, REPO, ReadGraph, canonical_rows, write_jsonl
-from .structures import enumerate_structures
+from .structures import enumerate_structures, components
+from .split import plan_split
 
 
 def main() -> None:
@@ -40,10 +41,13 @@ def main() -> None:
             assert {i['split'] for i in group} <= {'train','heldout_instance'}
             assert sum(i['split'] == 'heldout_instance' for i in group) <= 2
             assert any(i['split'] == 'train' for i in group)
+    plan=plan_split([known[s['structure_id']] for s in structures],report['seed'])
+    assert {s['structure_id']:s['split'] for s in structures}==plan.assignments
+    assert all(s['novelty']==plan.novelty.get(s['structure_id']) for s in structures)
     rng = random.Random(report['seed'])
     sample = []
     for hops in sorted(strata):
-        sample.extend(rng.sample(sorted(strata[hops],key=lambda i:i['instance_id']),12))
+        sample.extend(rng.sample(sorted(strata[hops],key=lambda i:i['instance_id']),min(12,len(strata[hops]))))
     # Add at least one of every retained aggregation, extra, and actual rendering mode.
     seen = {known[i['structure_id']].mode for i in sample}
     for i in instances:
@@ -78,8 +82,8 @@ def main() -> None:
             if structure.mode in ('top','bottom','argmax'):
                 k = i['params']['k']
                 probe,_ = graph.execute(structure.render(probe=True),dict(i['params'],probe_k=k+1))
-                assert len(probe) <= k or probe[k-1]['value'] != probe[k]['value']
-            assert all(i['params'][key] in names for key in ('name','other_name') if key in i['params'])
+                assert len(probe) <= k or probe[k-1][structure.sort_column] != probe[k][structure.sort_column]
+            assert structure.path.labels[0]!='User' or all(i['params'][key] in names for key in ('name','other_name') if key in i['params'])
             checks.append({'instance_id':i['instance_id'],'hops':i['hops'],'mode':structure.mode,
                            'n_rows':len(rows),'runtime_ms':round(runtime,3),
                            'rows_preview':rows[:3],'exact_replay':True})

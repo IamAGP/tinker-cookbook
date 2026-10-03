@@ -23,6 +23,7 @@ def test_uniform_label_granularity():
     assert parsed['aggregation'] == ['sum','Post']
     assert all(len(f)==2 and f[0] in ('User','Post') for f in parsed['filters'])
     assert 'score' not in s.signature and 'postId' not in s.signature
+    assert Structure(path,'sum',metric_property='score').signature == Structure(path,'sum',metric_property='viewCount').signature
     assert sig(path,[('Post','year/date range')]) != sig(path,[('User','year/date range')])
     # Different measured properties cannot enter this signature API.
     assert sig(path,aggregation=('sum','Post')) == sig(path,aggregation=('sum','Post'))
@@ -45,7 +46,7 @@ def test_subtypes_equal_explicit_label_filters():
     for subtype in ('Question','Answer'):
         assert sig(Path((subtype,)),aggregation=('sum',subtype)) == sig(
             Path(('Post',)),[('Post','label test:'+subtype)])
-    assert Structure(Path(('Question',)),'count').signature == Structure(Path(('Post',)),'label').signature
+    assert Structure(Path(('Question',)),'distinct').signature == Structure(Path(('Post',)),'label').signature
 
 
 def test_multiset_filters_and_set_extras():

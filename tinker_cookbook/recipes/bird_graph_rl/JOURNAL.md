@@ -585,3 +585,35 @@ Three corrections from the Fireworks agent, each verified from the files on disk
   of the $147.88 balance — so it worsens the billing problem and is not a small model. The page
   lists six models with per-token training; she is checking which, if any, is cheap, supports RL
   per token, has headroom and can be rendered by the existing harness. Not before milestone 1.
+
+## 2026-10-03 — owner's go-ahead for Tinker runs; E4 preflight (written before anything bills)
+
+**Decisions by the owner today:** student is Qwen/Qwen3.5-9B, trained on Tinker; the Fireworks
+arm is decided after this result. Opening Tinker balance **$128** (owner's statement, 2026-10-03).
+Everything a run writes is mirrored to object storage (`monitor.py`): metrics, rollout summaries,
+transcripts, config and figures. All earlier baseline runs were mirrored today as well.
+
+**Plan.** E4a: a two-update smoke run to measure what is currently unknown — real cost per step,
+datums per trajectory, training tokens per rollout, the fraction of groups removed as
+constant-reward, per-group reward spread, and whether the reasoning renderer breaks prefix
+extension. E4b: the first real run, **RL from the base model with no supervised warm start**,
+sized from E4a's measured cost. Reasons for no warm start first: the 9B already calls the tool
+on every question (no_query 0 in E3) and scores 0.425, so RL has signal; the stored queries are
+in a machine style unlike anything a model writes; and a warm start on a reasoning model needs
+demonstrations with reasoning, which the generated data does not have.
+
+**Rule-7 preflight (E4a and E4b).**
+1. *Timestamped progress per unit of work?* `rl.train` logs each iteration to `metrics.jsonl` and
+   the console; the monitor prints a line every sync.
+2. *Results on disk incrementally?* `metrics.jsonl` and rollout summaries are appended per
+   iteration; checkpoints every `save_every`; the monitor mirrors to object storage on a timer.
+3. *Does working memory grow?* Rollouts are per-iteration; database rows are capped at 25,000 per
+   re-execution and 50 shown to the model; the driver pool is capped at 24 connections.
+4. *If killed at 80%?* The last saved checkpoint and every logged iteration survive locally and
+   in object storage; `behavior_if_log_dir_exists=resume` continues from the checkpoint.
+**Cost bound.** No rented GPU and no idle billing: Tinker bills per token. The bound is
+`max_steps` × groups × rollouts. E4a: 2 steps × 8 groups × 8 rollouts = 128 rollouts. Upper-bound
+estimate from E3 token counts and list prices: 128 × $0.01454 = $1.86. E4b's `max_steps` is set
+from E4a's measured cost, not from the dataset size, with a stated dollar ceiling.
+**Not billed by time, so no idle watchdog; the watchdog is the step cap plus the monitor.**
+**Blocked on:** natural-language questions for the generated instances (Codex, in progress).
