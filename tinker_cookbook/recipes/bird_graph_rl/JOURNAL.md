@@ -568,3 +568,20 @@ Three corrections from the Fireworks agent, each verified from the files on disk
   allows stay in training (at most 34 at six each on the first output's counts); the rest move to
   the held-out split. The earlier ≥1,500-instance target is dropped. Budget, not data volume, is
   the binding limit on training length.
+
+## 2026-10-03 — small corrections and a division of labour
+
+- **Rounding.** The entry above says 209 deep instances; "at most 15%" of 1,392 is 208 (208.8
+  floored). Nothing downstream changes: 34 deep structures at six instances each.
+- **Fireworks prices now have two official sources** (Fireworks agent, ledger F45): $13.00 per
+  B200-hour on the public pricing page as well as in the cost catalog. Start-up time is stated
+  there as not charged; whether a trainer's initialisation is billed is unsettled.
+- **Owner's direction:** facts and verification about the Fireworks platform belong to the
+  Fireworks agent, not to me. I checked one of her claims independently when asked whose claim it
+  was; routine lookups on that platform go to her from here on.
+- **Owner's idea, assessed:** train a different student on Fireworks, suggested Gemma 4.
+  Fireworks' fine-tuning models page (my read through a fetch summary; hers to confirm) lists
+  Gemma 4 only as 26B and 31B, dedicated 4 × B200, no per-token training — $52/hour, 2.84 hours
+  of the $147.88 balance — so it worsens the billing problem and is not a small model. The page
+  lists six models with per-token training; she is checking which, if any, is cheap, supports RL
+  per token, has headroom and can be rendered by the existing harness. Not before milestone 1.
