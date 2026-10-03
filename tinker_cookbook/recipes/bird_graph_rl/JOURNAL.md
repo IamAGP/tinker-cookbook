@@ -1065,3 +1065,19 @@ where it differs.
    lands on an anomalous update. It is never evaluated on the 186.
 Also recorded: the "how many" target is one combined figure of about 28%, and the 10% of
 training questions at 3–4 hops is a declared departure from the human 4.2%.
+
+**E9 addendum: what follows run 2 is decided now, not after the result (2026-10-03, proposed by
+the Fireworks agent, adopted before run 2 exists).** The remaining Tinker budget covers run 2 and
+one further run of about the same size, not two (ledger W8; those figures are the Fireworks
+agent's estimates from the run folders and have not been recomputed here). Choosing that further
+run after seeing run 2 would be a forking path, so the rule is fixed in advance, keyed on the
+confirmatory test (paired lenient difference on the 186, run 2 minus run 1):
+- **Interval touches zero** → a seed repeat of run 1's data. Only that can make the comparison
+  readable; a longer run would say nothing about the hypothesis.
+- **Interval clearly above zero** → 37 more steps of the run 2 arm, as a labelled extension. This
+  needs more new-mix questions than the 320 specified, or a second pass over the same ones; which
+  of the two is stated when it is run.
+- **Run 2 not better** → 37 more steps of the run 1 arm on its unused training questions.
+Any of the three is a separate billed run with its own preflight. A replication of run 1 on the
+other platform would also measure run-to-run variance (confounded with platform if the two
+disagree); it is not part of this rule because it is not yet runnable.
