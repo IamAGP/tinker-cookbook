@@ -859,3 +859,38 @@ any continuation is a separate, labelled run under pre-registration addendum 3.
 **Next, once:** this checkpoint on the 186 at four samples (the milestone-1 result, hit or
 miss), and base and this checkpoint on the 360 held-out-structure questions, read by hop.
 Estimated balance before these evaluations: $77.92.
+
+### E7 RESULT — MILESTONE 1: the selected checkpoint on the 186, four samples (2026-10-03)
+
+Reported as pre-registered: once, hit or miss.
+
+| | strict, per-question mean over 4 samples |
+|---|---|
+| Qwen3.5-9B before training | 0.4207 |
+| after 37 steps of RL from base (step-37 checkpoint) | **0.4664** |
+| paired difference | **+0.0457**, 95% bootstrap [+0.0094, +0.0820] |
+| reference (Qwen3.8-27B, single sample) | 0.608 |
+
+**The pre-registered bar is NOT met.** It required the interval's lower bound to be above zero
+*and* a point estimate of at least +0.05. The interval excludes zero; the point estimate is
++0.0457, short by 0.0043. By the rule both agents signed before training, this is reported as
+not clearing the bar. It is a real, statistically positive improvement of about four and a half
+points, and it closes 24.4% of the gap to the reference. It is not the result the bar asked for.
+The forgetting guard is met: the simple tier rose (0.477 → 0.525).
+
+**Where the change came from.**
+- By tier: simple +0.048, moderate +0.050, challenging −0.050 (5 questions).
+- By baseline group: the 72 questions never solved in four baseline samples rose to 0.125 and
+  contribute +0.0484; the 66 mixed questions rose 0.458 → 0.511 (+0.0188); the 48 always-solved
+  questions fell to 0.917 (−0.0215). So training unlocked some previously unsolved questions and
+  cost some reliability on previously certain ones.
+- **Lenient accuracy barely moved: 0.5739 → 0.5766.** Lenient counts an answer whose values are
+  right even if its shape is not. Strict rose by 0.0457 and lenient by 0.0027, so on the
+  benchmark most of the gain is answers that were already right in substance becoming right in
+  form. That is a narrower achievement than "the model got better at graph questions".
+- The gain on generated held-out questions was much larger (+0.174 on 264) than on the benchmark
+  (+0.046 on 186): the policy learned the generated distribution better than it transferred.
+
+Under pre-registration addendum 3 this stands as the milestone-1 result. Any further run is a
+separate, labelled result, and any change to the data must be justified by evidence that is not
+the 186. Upper-bound cost of the four passes: $3.95.
