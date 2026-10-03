@@ -837,3 +837,25 @@ scorer cannot reward or test, so nothing may be claimed about learning to order 
    and is an option, not a plan.
 I had written earlier today that if run 1 fell short, the aggregation mismatch would be my first
 suspect and worth a second pass. That intention stands only under point 3.
+
+### E4b stage 2 RESULT and checkpoint selection (2026-10-03 12:07–12:38)
+
+Stage 2 ran steps 20–36 (17 steps, 1,088 rollouts) for an estimated $14.12; 41.2% of groups were
+dropped as constant-reward, up from 31.9% in stage 1. Run 1 in total: 37 steps, 2,368 rollouts,
+296 distinct questions, estimated $35.09.
+
+| checkpoint | held-out-instance strict (264, 1 sample) | Δ vs base, 95% paired bootstrap | turns | turn-cap hits | query errors |
+|---|---|---|---|---|---|
+| base | 0.504 | — | 4.60 | 82 | 229 |
+| step 10 | 0.534 | +0.030 [−0.038, +0.098] | 4.36 | 74 | 215 |
+| step 20 | 0.602 | +0.098 [+0.034, +0.163] | 4.19 | 59 | 206 |
+| step 30 | 0.636 | +0.133 [+0.064, +0.197] | 3.85 | 45 | 183 |
+| **step 37** | **0.678** | **+0.174 [+0.110, +0.242]** | 3.67 | 45 | 176 |
+
+**Selected checkpoint: step 37**, the best on generated held-out instances, chosen without any
+look at the 186. `tinker://0cdf64fc-e5c9-5c9d-8d79-1626d6e4db44:train:0/sampler_weights/final`.
+Accuracy was still rising when the planned 37 steps ended; training stops here as planned, and
+any continuation is a separate, labelled run under pre-registration addendum 3.
+**Next, once:** this checkpoint on the 186 at four samples (the milestone-1 result, hit or
+miss), and base and this checkpoint on the 360 held-out-structure questions, read by hop.
+Estimated balance before these evaluations: $77.92.
