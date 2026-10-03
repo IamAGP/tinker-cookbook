@@ -658,3 +658,10 @@ bill; and LoRA alpha (the checkpoint exists now, so it can be read from the expo
 needs 480 distinct training questions; 40 steps is $63.02 and 640. Codex is writing them now.
 Meanwhile three more zero-shot passes of the 9B on the 186 are running, to give the four-sample
 baseline that the pre-registered bar is defined on.
+
+**Pre-registration addendum, written before E4b starts (2026-10-03).** Milestone 1 is RL from
+the base Qwen3.5-9B with the partial-credit reward. A supervised warm start, if it is run, is a
+separate arm and a separately labelled claim; it does not count toward milestone 1. The bar
+(≥5 points on the 186 with a bootstrap interval excluding zero, simple tier not down by more than
+3) is evaluated on a four-sample baseline and a four-sample evaluation of one checkpoint, chosen
+on generated `heldout_instance` data only.
