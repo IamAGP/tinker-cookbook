@@ -97,3 +97,38 @@ all instances.
   the evaluation questions or model-written queries by structure.
 - **A5 Stage-B hints are undecided.** Do not invent a hint field in the pilot; write questions
   only. (Evaluation prompts carry a hint; whether generated ones should is an open decision.)
+
+## Amendments B (2026-10-03, after reading the pilot) — binding; B1 and B2 correct errors in this spec
+The pilot followed the spec faithfully and the result is unlike anything a person would ask.
+Two of the causes are rules written above; they are withdrawn here.
+
+- **B1 Vocabulary (replaces "must not mention labels, relationship types or property names").**
+  Use the domain's ordinary words: user, post, question, answer, comment, vote, badge, tag,
+  reputation, score, view count, favourite count, display name, title, location, age, and so on.
+  Do **not** invent synonyms ("member", "standing points", "contribution", "remark"). What stays
+  forbidden is query syntax: relationship type names in capitals, camelCase identifiers, label
+  syntax, and the words "node", "edge", "relationship", "route", "connection", "path".
+- **B2 No output-column instructions (replaces "must name the exact return columns").** A
+  question says in plain words what is wanted ("list the titles", "how many", "which user").
+  It never names an alias such as `value` or `entity_id`. Scoring ignores column names.
+- **B3 Naturalness is decided per structure, before the split.** Keep a structure only if it has
+  a one-sentence plain-English intent that a visitor to a Q&A site could plausibly ask. Drop
+  structures whose only honest reading is counting graph paths with multiplicity ("how many
+  routes from X through … to …"). Write the intent sentence into `structures.jsonl`. Report what
+  was dropped **by component** (path, aggregation, extras), so a whole component class cannot
+  disappear unnoticed. Re-run the split after filtering; A3 still applies to what remains.
+- **B4 Anchors and return shapes must vary.** Measured on the current output: 78.7% of filter
+  uses anchor on a numeric id and 59.9% of instances return a single column aliased `value`.
+  Anchor instead on a unique display name, a post title, a tag name, a badge name, a year or a
+  date range wherever the structure allows; keep numeric ids to a minority. Return what a person
+  would want — names, titles, dates, counts, averages, percentages — with semantically named
+  columns, not one fixed alias pair.
+- **B5 Hints.** About 92% of instances carry a hint in the form "X refers to Y; …", written
+  deterministically from the query's own parts (which stored field a phrase maps to, how a
+  percentage or difference is computed). Use the source-style field names listed in
+  `../DATA_HANDOFF.md` where they differ from graph property names. The rest carry none.
+- **B6 Question writing at scale must not be a template.** One question per instance, individually
+  worded; vary form, length and register; no shared sentence skeleton across instances of the
+  same structure beyond what the meaning forces.
+
+Redo the pilot (60 questions) under B1–B6 before scaling, and report how many structures B3 removed.

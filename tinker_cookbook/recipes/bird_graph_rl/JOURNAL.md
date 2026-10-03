@@ -513,3 +513,23 @@ report the fraction of groups removed as constant and per-group reward spread.
 - `env_file` is now a CLI field.
 - Steps will be set from budget (`max_steps`), not dataset size; checkpoint selection happens
   after the run on a fixed generated set of ≥200, not on the 64-question in-loop monitor.
+
+## 2026-10-03 — first read of the generated data: not usable as is, and two causes are my spec
+
+Codex's interim output: 5,590 verified instances; 60 individually written pilot questions.
+Reading the pilot beside the queries (free, no sampling):
+- **Invented vocabulary.** Questions say "members", "standing points", "contributions",
+  "remarks". My spec forbade "labels, relationship types or property names" in questions; I
+  meant query syntax, and wrote a rule that also banned the ordinary words *user*, *post*,
+  *reputation*. Evaluation questions use those ordinary words. **My error.**
+- **Alias instructions.** Questions end "Return the total in `value`". My spec said a question
+  "must name the exact return columns". Scoring ignores column names. **My error.**
+- **Path-counting questions** ("how many complete routes run from … do not reuse a connection")
+  are valid queries no person would ask.
+- **Low diversity, measured:** 78.7% of filter uses anchor on a numeric id (name, title or tag
+  name: 11.7%); 59.9% of instances return one column aliased `value`.
+Training on this would teach a distribution unlike the evaluation set. Amendments B1–B6 are in
+`datagen/SPEC.md` and queued to Codex: ordinary vocabulary, no alias instructions, naturalness
+decided per structure before the split with removals reported by component, varied anchors and
+return shapes, deterministic hints at the evaluation rate, non-templated question writing. The
+pilot is to be redone before anything is scaled. Usable training-set size is unknown until then.
