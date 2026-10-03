@@ -926,3 +926,32 @@ unseen data rose by 0.153 overall, and the rise appears at every depth.
 Upper-bound cost of the two passes: $6.88. Estimated balance after all of today's work: $67.09
 of the $128 opening figure (training $35.09, evaluation $23.01, smoke $2.81), still unconfirmed
 by any bill.
+
+### E7 correction — my group breakdown was a regression-to-the-mean artefact
+
+I reported that the 72 never-solved questions rose to 0.125, the 48 always-solved fell to 0.917,
+and concluded that training "unlocked some previously unsolved questions and cost some
+reliability on previously certain ones". The groups were defined on the same four baseline
+passes that served as the baseline. A question that scored 4 of 4 was partly lucky and scores
+lower on any re-evaluation; one that scored 0 of 4 was partly unlucky and scores higher.
+**The artefact, measured with no training:** groups defined on two baseline passes and read on
+the other two give +0.117 for "never" and −0.128 for "always" — as large as what I reported.
+**Unbiased** (groups on two baseline passes, baseline on the other two, six splits averaged):
+
+| group | before | after | per-question change | contribution to the mean |
+|---|---|---|---|---|
+| never solved | 0.117 | 0.178 | +0.061 | +0.0293 |
+| mixed | 0.425 | 0.511 | +0.086 | +0.0166 |
+| always solved | 0.872 | 0.871 | −0.001 | −0.0002 |
+
+So: **no evidence of lost reliability**; the per-question gain is largest in the mixed group,
+which is what group-relative RL should produce; the never group contributes most in total only
+because it is the largest. Found by the Fireworks agent, who had asked for the breakdown.
+**Form share, quantified (her measurement, verified):** right-values-wrong-shape fell 0.1532 →
+0.1102; 94.1% of the strict gain on the 186 is form. The reward gives nothing for right values in
+the wrong shape, so shape is what it teaches. On human questions the policy learned to return
+what was asked for; it did not learn to answer more questions.
+**On the miss:** the gain is 2.8 sampling standard errors (real); the shortfall of 0.0043 is
+0.27 of one. A threshold on a point estimate clears only about half the time when the true
+effect sits on it. That is a property of the bar we signed, stated as a fact about it and for no
+other purpose: the bar was read once and is not re-read.
