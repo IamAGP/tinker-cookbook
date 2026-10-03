@@ -36,6 +36,9 @@ def hint(structure: Structure, instance_id: str) -> str | None:
         parts.append(f'the text condition refers to a case-sensitive '+('substring' if structure.mode=='contains' else 'prefix')+f' of {field}')
     if structure.mode=='ratio': parts.append('the percentage refers to 100 times the number of distinct qualifying entities with a positive stored measurement divided by all distinct qualifying entities, including missing measurements')
     if structure.mode=='comparison': parts.append('the difference refers to the first named user total minus the second named user total, counting each qualifying entity once per user')
+    if structure.mode=='nth': parts.append('the rank refers to descending stored measurement, starting at one')
+    if structure.mode=='projection': parts.append('the list refers to distinct displayed names or text, sorted alphabetically')
+    if structure.mode in ('conditional_count','conditional_sum'): parts.append('the condition refers to a stored measurement greater than or equal to the stated threshold; nonqualifying or missing measurements contribute zero')
     if structure.mode in ('entity_group','entity_having'): parts.append('the associated count refers to distinct associated entities, not repeated matches')
     parts.append('each qualifying entity is counted once')
     return '; '.join(parts)+'.'

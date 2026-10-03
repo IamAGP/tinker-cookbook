@@ -665,3 +665,28 @@ separate arm and a separately labelled claim; it does not count toward milestone
 (≥5 points on the 186 with a bootstrap interval excluding zero, simple tier not down by more than
 3) is evaluated on a four-sample baseline and a four-sample evaluation of one checkpoint, chosen
 on generated `heldout_instance` data only.
+
+### E4a correction — my datums-per-trajectory figure was wrong (found by the Fireworks agent, verified here)
+
+I reported 1.062 datums per trajectory and concluded that multi-turn trajectories merge into one
+training sequence and that training was "near the low bound". I had noted while computing it that
+the log might print only a sample, and then wrote the conclusion down as settled anyway. It was
+a sample: the 102 markers belong to the 16 trajectories the logger prints.
+**Verified three ways.** (1) The log context shows per-trajectory printing under a
+"Trajectory Group" header. (2) A turn can extend the previous training sequence only if its
+prompt is at least the previous prompt plus the previous action; on kept trajectories that
+fails on 162 of 257 transitions in step 0 and 116 of 182 in step 1. The renderer drops earlier
+reasoning from the history, so the next prompt is shorter than what was sampled. (3) The
+cookbook's `trajectory_to_data` returns a single datum only when every observation contains the
+previous observation plus action as a prefix.
+**Corrected figures, from datum boundaries:** 3.89 and 3.90 datums per kept trajectory; 7,936
+and 7,934 training tokens per kept rollout; $1.309 and $1.010 per 64-rollout step, mean $1.16;
+the smoke run cost an estimated $2.32, not $1.58. Training is about half the cost, not a quarter.
+**What does not change:** the learning signal (9 of 16 groups with spread ≥ 0.82, 0.25 dropped
+as constant), wall time, and the KL check — which shows the trainer reproduces what the sampler
+saw, true with one datum per turn as much as with one per trajectory.
+**Run 1 resized before launch.** 30 steps of 16 × 8 would be an estimated $69.59, not $47.26.
+Instead: 8 groups × 8 rollouts, staged — 20 steps (estimated $23.20, 160 questions), extended to
+40 (estimated $46.40, 320 questions) only if the reward curve is rising and the bill agrees with
+the estimate. Learning rate 1e-5 is inside the cookbook's own guidance for RL (1e-5 to 4e-5;
+its multi-turn RL example uses 1e-5), checked today in `skills/research`.

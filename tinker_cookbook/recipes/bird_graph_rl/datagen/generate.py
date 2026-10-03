@@ -145,7 +145,7 @@ def parameter_sets(structure: Structure, pool: Rows, names: dict[JSONScalar,str]
             params['rank']=rng.choice([2,3,5])
             params['skip']=int(params['rank'])-1
         if structure.mode in ('conditional_count','conditional_sum'):
-            metrics=[r['metric'] for r in pool if isinstance(r['metric'],(int,float))]
+            metrics=[float(v) for v in str(row.get('condition_values') or '').split('|') if v] if structure.path.hops else [r['metric'] for r in pool if isinstance(r['metric'],(int,float))]
             if not metrics: continue
             params['condition']=rng.choice(metrics)
         if structure.mode in ('top','bottom','argmax'):
@@ -176,6 +176,18 @@ def parameter_sets(structure: Structure, pool: Rows, names: dict[JSONScalar,str]
 
 
 def enrich_texts(graph: ReadGraph, structure: Structure, pool: Rows) -> Rows:
+    if structure.mode in ('conditional_count','conditional_sum') and structure.path.hops:
+        root_key = PROPERTIES[structure.path.labels[0]][0]
+        rows,_ = graph.execute(
+            f'CYPHER 25 MATCH REPEATABLE ELEMENTS {structure.path.pattern} '
+            f'WHERE n0.{root_key} IN $anchors AND {structure.measure} IS NOT NULL '
+            f'RETURN DISTINCT n0.{root_key} AS anchor, {structure.measure} AS measurement '
+            'ORDER BY anchor, measurement LIMIT 5000',
+            {'anchors':[r['anchor'] for r in pool]},cap=None)
+        measured: dict[JSONScalar,list[str]] = {}
+        for row in rows:
+            measured.setdefault(row['anchor'],[]).append(str(row['measurement']))
+        return [dict(r,condition_values='|'.join(measured.get(r['anchor'],[]))) for r in pool]
     if structure.mode not in ('contains','starts','year'):
         return pool
     root_key = PROPERTIES[structure.path.labels[0]][0]

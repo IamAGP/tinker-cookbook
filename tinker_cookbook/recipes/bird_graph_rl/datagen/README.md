@@ -1,3 +1,52 @@
+# Amendments C checkpoint
+
+C2 rebalanced and C3 new shallow shapes executed; exact current counts:
+
+```json
+{
+  "step": "C2/C3 applied; replay next",
+  "totals": {
+    "enumerated_structures": 505,
+    "kept_structures": 431,
+    "kept_instances": 4982
+  },
+  "c2": {
+    "training_shallow_share": 0.5003756574004508,
+    "training_deep_share": 0.14951164537941397,
+    "training_structure_min": 6,
+    "training_structure_max": 10
+  },
+  "split_hops": {
+    "train": {
+      "0": 166,
+      "1": 500,
+      "2": 466,
+      "3": 70,
+      "4": 129
+    },
+    "heldout_instance": {
+      "0": 33,
+      "1": 100,
+      "2": 93,
+      "3": 14,
+      "4": 24
+    },
+    "heldout_structure": {
+      "0": 54,
+      "1": 169,
+      "2": 1000,
+      "3": 1073,
+      "4": 1091
+    }
+  },
+  "moved_deep": 151
+}
+```
+
+Next: independent replay, hints refresh, then append individually authored
+questions in priority order, checkpointing after each batch. Earlier sections
+below describe the previous revision. C1 withdraws the return-width concern.
+
 # Amended data generation — checkpoints complete
 
 A1–A3, B3, B4 implementation, regeneration/replay, B5, and the amended pilot are

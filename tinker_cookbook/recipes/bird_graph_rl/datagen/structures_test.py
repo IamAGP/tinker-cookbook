@@ -55,3 +55,17 @@ def test_multiset_filters_and_set_extras():
     b=sig(p,[('User','year'),('User','id')],extras=('existence','negation','existence'))
     assert a==b
     assert a!=sig(p,[('User','id'),('User','id'),('User','year')],extras=('negation','existence'))
+
+
+def test_c3_shapes_have_distinct_signatures_and_exact_rendering():
+    p=chain(('User','Post'),'OWNS')
+    modes=('nth','conditional_count','conditional_sum','projection','distinct')
+    shapes=[Structure(p,mode) for mode in modes]
+    assert len({s.signature for s in shapes})==len(shapes)
+    assert 'SKIP $skip LIMIT 1' in shapes[0].render()
+    assert 'SKIP' not in shapes[0].render(probe=True)
+    for s in shapes[1:3]:
+        assert 'CASE WHEN' in s.render() and '$condition' in s.render()
+        assert ['Post','numeric range'] in json.loads(s.signature)['filters']
+    assert 'RETURN DISTINCT' in shapes[3].render()
+    assert 'WITH DISTINCT' in shapes[4].render() and 'RETURN count(*)' in shapes[4].render()
