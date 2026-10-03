@@ -1246,3 +1246,17 @@ cause not examined. Her reproduction of every figure in the result tables agrees
 decimals on point estimates; intervals differ in the third decimal by generator.
 **Statement that stands for the write-up:** on human questions, run 1 fixed form and left
 substance flat; run 2 has the same strict accuracy within noise and lost some substance.
+
+**Second batch of new-mix questions checked (2026-10-03 17:30).** 280 questions over 142
+structures, disjoint from the first 320, at most 5 questions per structure across both batches.
+Same independent check as the first batch (`verify_v4.py suffix=_batch2`): no held-out signature
+or component, no shared instance, query or question text, all 280 answers reproduced live, none
+of 59 plain counts differs from a distinct count, no self-answering lookups. Snapshot and the
+built file `train_batch2_280.jsonl` are in object storage. Not used by any run yet.
+
+**Fireworks plumbing trial (the Fireworks agent's, ledger W12–W14).** The same loop, reward and
+environment at the pinned blobs ran two updates of 4 × 8 rollouts on Fireworks serverless with
+Qwen3.8-27B: training, sampling from a saved adapter and saving state all work; billed $1.62.
+It says nothing about learning and is not the 9B. Worth noting for the design: the 27B answered
+29 of 32 and 25 of 32 of the generated training questions correctly before any training, so
+this training set leaves the larger model little to learn from.
