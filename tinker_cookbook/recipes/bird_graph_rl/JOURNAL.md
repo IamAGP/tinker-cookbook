@@ -1431,3 +1431,18 @@ both $40.62): $4.72 billed against $8.26 estimated at list, ratio 0.571. The gat
 was a balance of at least $39.58; it is met, so run 3 is launched. Worst case at list prices
 ($35.80 training + $3.78 for the four passes on the 186 + $3.32 for the 360 = $42.90) exceeds the
 balance by $2.28, in which case the 360 pass, which runs last, would not complete.
+**E10a reproduced independently** by the Fireworks agent from the sixteen folders with her own
+code (same point estimates; intervals differ in the third or fourth decimal by generator).
+**Caveat she adds, adopted:** the passes with hints were sampled on earlier days than the
+hint-free ones (untrained: September and 3 October; run 2: 3 October; all hint-free passes:
+6 October). Drift in serving between days cannot be ruled out; it would move each model's
+benefit, but the difference of the two benefits cancels any drift common to both models. The
+comparison between models carries the claim; neither benefit alone does.
+**Also recorded:** no single question shows the effect cleanly — no question goes from "4 of 4
+with the hint, 0 of 4 without" for the untrained model to failing with the hint in run 2. The
+effect is spread thinly: a hint is worth two or more of four samples (lenient) on 38 questions
+for the untrained model and on 16 for run 2.
+**Objective, from the official documentation** (Tinker docs, losses → importance sampling, read
+2026-10-06): L_IS(θ) = E_{x~q}[ p_θ(x)/q(x) · A(x) ], implemented as
+`prob_ratio = exp(target_logprobs − sampling_logprobs); loss = −(prob_ratio · advantages).sum()`;
+`loss:sum` is the diagnostic returned by the training call.
