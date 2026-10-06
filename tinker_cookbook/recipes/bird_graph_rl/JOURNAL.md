@@ -1393,3 +1393,41 @@ $50.46 at list, about $37.90 at run 2's measured ratio (0.751). At full list pri
 would be exhausted during the last evaluation; with auto-reload off nothing can be charged
 beyond the balance. **Gate:** stage B starts only if the balance after stage A is at least
 $39.58 (training plus the four passes on the 186, at list).
+
+### E10a RESULT — do the models rely on hints? (2026-10-06, 17:07–17:18)
+
+Eight passes of the 186 with the hint withheld, all 186 scored in each, no harness errors.
+172 of the 186 questions carry a hint. From `e10_analyze.py` → `e10_result.json`.
+
+| mean over four samples | untrained, with hint | untrained, without | run 2, with hint | run 2, without |
+|---|---|---|---|---|
+| lenient | 0.5739 | 0.4476 | 0.5524 | 0.4987 |
+| strict | 0.4207 | 0.2997 | 0.4758 | 0.3817 |
+
+Hint benefit on the 172 hinted questions (with minus without), paired bootstrap over questions:
+- **Lenient (primary):** untrained +0.1294 [+0.0799, +0.1788]; run 2 +0.0610 [+0.0131, +0.1105].
+  **Difference of benefits, run 2 minus untrained: −0.0683 [−0.1090, −0.0291]. The
+  pre-registered prediction is supported:** the trained model gains about half as much from a
+  hint as the untrained one.
+- Restricted to the 98 hinted questions neither model answers leniently 4 of 4 with hints:
+  −0.0536 [−0.1097, +0.0026] — same direction, interval touching zero.
+- Strict: untrained +0.1323, run 2 +0.1032; difference −0.0291 [−0.0727, +0.0160], not
+  distinguishable from zero.
+- Placebo, the 14 questions with no hint (nothing changes for them): untrained +0.089
+  [−0.036, +0.196], run 2 −0.036 [−0.143, +0.054] lenient — noise of that size on 14 questions.
+- The untrained model does benefit from hints (interval above zero), so the hypothesis had room.
+
+**What it shows and what it does not.** Without hints run 2 is *better* than the untrained
+model leniently (0.4987 against 0.4476); with hints it is not (0.5524 against 0.5739). So
+training made the model better at answering from the question alone and no better — if
+anything worse — at using what the hint adds. Two readings fit a smaller benefit: the policy
+learned to discount hints, or it learned skills that stand in for what hints supply. The second
+alone would not make it lose ground when hints are present; the first would. Neither is
+established by this. As stated in advance, this cannot attribute the change to hint *text*
+(run 1 had the same hints); that is what run 3 is for. The prediction held against the headwind
+named beforehand (hint-free prompts are unusual for run 2).
+**Cost of E10a and the gate.** Balance $45.34 → **$40.62** (two readings a few minutes apart,
+both $40.62): $4.72 billed against $8.26 estimated at list, ratio 0.571. The gate for stage B
+was a balance of at least $39.58; it is met, so run 3 is launched. Worst case at list prices
+($35.80 training + $3.78 for the four passes on the 186 + $3.32 for the 360 = $42.90) exceeds the
+balance by $2.28, in which case the 360 pass, which runs last, would not complete.
