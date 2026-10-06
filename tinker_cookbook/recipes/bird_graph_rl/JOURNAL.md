@@ -1446,3 +1446,50 @@ for the untrained model and on 16 for run 2.
 2026-10-06): L_IS(θ) = E_{x~q}[ p_θ(x)/q(x) · A(x) ], implemented as
 `prob_ratio = exp(target_logprobs − sampling_logprobs); loss = −(prob_ratio · advantages).sum()`;
 `loss:sum` is the diagnostic returned by the training call.
+
+### E10b RESULT — run 3, rewritten hints (2026-10-06, training 17:20–18:14, evaluations to 18:33)
+
+**Training.** 37 steps × 8 × 8 = 2,368 rollouts on the same 296 questions in the same order as
+run 2, hint text replaced; 53.6 minutes, no errors. 29.7% of groups dropped as constant-reward
+(run 2: 33.8%). Tokens: 15,683,717 prompt, 3,246,900 sampled, 14,033,382 trained. Final
+checkpoint `tinker://3434919e-407f-5ee4-af52-811680abf62a:train:0/sampler_weights/final`.
+A loss value was recorded for every step (`forward_backward.jsonl`): `loss:sum` between about
+−4,500 and +6,200 over the first 24 steps with no trend, as expected for this objective.
+**Cost.** Estimated at list $37.36 training + $7.65 evaluations = $45.01. Console balance $40.62
+before, **$5.66 after** (18:35): $34.96 billed, ratio 0.777. The whole of E10 cost $39.68.
+
+| the 186, 4 samples | strict | lenient |
+|---|---|---|
+| untrained | 0.4207 | 0.5739 |
+| run 1 | 0.4664 | 0.5766 |
+| run 2 | 0.4758 | 0.5524 |
+| run 3 | 0.4570 | 0.5578 |
+| run 3 − run 2 | −0.0188 [−0.0538, +0.0161] | **+0.0054 [−0.0242, +0.0363]** |
+| run 3 − untrained | +0.0363 [−0.0013, +0.0739] | −0.0161 [−0.0484, +0.0161] |
+
+The 360 unseen-structure questions, one sample: strict 0.4167 (untrained 0.2944, +0.1222
+[+0.0639, +0.1806]; run 2 0.4056, +0.0111 [−0.0472, +0.0722]); lenient 0.4833 (untrained
+0.3611; run 2 0.4500, +0.0333 [−0.0278, +0.0944]). All passes scored every question.
+Samples on the 186 (strict / lenient only / wrong / wrong at turn cap / no query):
+340 / 75 / 194 / 134 / 1 (run 2: 354 / 57 / 224 / 108 / 1).
+
+**Read against the pre-registration.**
+1. *Confirmatory test (lenient, run 3 minus run 2): not supported.* +0.0054 with an interval
+   centred near zero. Rewriting the hints so that every explained phrase comes from the question
+   did not raise accuracy in substance on human questions.
+2. *Bar (strict, run 3 against untrained): not met* — +0.0363, lower bound just below zero.
+3. Run 3 is not distinguishable from run 2 or run 1 on either scorer.
+**What E10 as a whole says.** E10a: RL on these data roughly halves what a hint is worth to the
+model (supported, reproduced independently). E10b: making the training hints match the
+question in form does not undo that, in one run. So the reduced use of hints is real, and the
+mismatch property that was measured and fixed is not shown to be its cause. Stated beforehand
+and still standing: the rewrite also made hints emptier and templated, so this is not a test of
+training on hints as informative as human ones; and it is one seed per arm.
+**Across the three runs,** strict on the 186 is 0.466, 0.476, 0.457 and lenient 0.577, 0.552,
+0.558, from three different training sets. That spread is the only evidence here about how
+much such runs vary; the differences between them were never distinguishable. The fair summary
+of the 9B on Tinker: RL adds about four to five points of strict accuracy on human questions,
+through answer form; lenient accuracy does not rise in any of three runs.
+**Not run:** whether run 3 itself relies on hints more than run 2 (a hint-free pass of run 3).
+The balance, $5.66, covers it (about $3 billed) but the owner asked for no further experiments
+after today's, so it is left as the obvious next measurement.
