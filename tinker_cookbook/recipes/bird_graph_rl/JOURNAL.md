@@ -1283,3 +1283,37 @@ experiments until he returns.** Nothing is running and nothing billed is pending
 - To do on return, none of it billed: quote the objective from the official documentation;
   choose worked examples by a stated rule; replace the one-sample 27B reference (0.608) in the
   draft with a four-sample figure once agreed which platform's to cite.
+
+## 2026-10-06 — E10 pre-registration: the hint experiment (written before any data or run exists)
+
+**Decision by the owner today:** today is the last day for experiments; final drafts follow. One
+more Tinker run fits in the balance ($45.78 at the last reading, to be re-read before launch).
+**Departure from the rule fixed on 2026-10-03, declared.** That rule put run 2's outcome in the
+"run 2 not better" branch: 37 more steps of the run 1 arm. I am not running that. Reason, from
+evidence that arrived after the rule was written: the same recipe on a larger model gained more
+(ledger W15–W20), so "does more training help" is the less informative question, while the hint
+mismatch (W11) is a measured flaw in the data that neither run could test. The rule's branch is
+recorded as not run.
+
+**Hypothesis.** Training on hints that explain terms absent from the question teaches the policy
+to discount hints, which are the informative part of human questions; that is why substance
+does not transfer.
+**E10a — a diagnostic on existing models, no training.** Evaluate the untrained model and run 2
+(step 37) on the 186 *with the hints removed*, four samples each, and compare with their
+existing four passes with hints. Quantity: the hint benefit, lenient accuracy with hints minus
+without, per model. *Prediction:* the hint benefit is smaller for run 2 than for the untrained
+model (paired over questions; interval of the difference of benefits below zero → supported).
+If the untrained model itself gains nothing from hints, the hypothesis has no room to be true
+and that is reported.
+**E10b — run 3.** Identical to run 2 — same 320 questions in the same order (seed 0), 37 steps ×
+8 × 8, same settings, step 37 fixed in advance — except the hint text, rewritten under amendment
+E. *Confirmatory test:* lenient accuracy on the 186 at four samples, run 3 minus run 2, paired
+bootstrap; interval above zero → supported, otherwise not supported by this run. Strict reported
+beside it; run 3 against the untrained model reported against the usual bar.
+Also evaluated: the 360 unseen-structure set at one sample (its hints are in the old style, so a
+drop there would not count against the hypothesis). Not evaluated, to fit the budget: the 264 set
+and step 30.
+**Stated limits.** One run per arm, seed variance unmeasured; the two runs differ in hint text
+only, but hint text also changes prompt length slightly. A loss value is captured this time.
+**Cost bound.** List-price estimates from run 2: training $35.80, evaluations $7.10, diagnostic
+$7.56; total $50.46, about $37.90 at the billing ratio measured on run 2 (0.751).

@@ -243,3 +243,35 @@ question. No instance may appear in both batches; the limit of 5 questions per s
 across the two batches together. Report the achieved mix of the batch on its own.
 - **Negation** is a component the split holds out entirely, so it cannot appear in training;
   its 3% is dropped from the target and reported as a declared shortfall, in both batches.
+
+## Amendment E (2026-10-06) — hints that explain the question (for one experiment)
+**Why.** In human-written hints the phrase being explained comes from the question. Measured on
+5,121 human hints from 69 other databases, only 2.2% contain a clause "X refers to Y" whose X
+shares no word with the question. In our training files it is about 82%: the generator explains
+fields its query carries internally ("score refers to Score" on a question that never mentions
+score). This amendment rewrites the hints of the 320 first-batch questions and changes nothing
+else, so that one training run can test whether hint style matters.
+
+**Frozen:** everything in `out/` and `out/v4/` as it stands. The 320 instances, their questions,
+answers, order and ids stay byte-identical. Only the hint text changes.
+
+**Write `out/v4/hints_v5.jsonl`** (`instance_id`, `hint`) for the 320, under these rules:
+1. **Same questions carry a hint.** The 291 that have a hint now keep one; the 29 without stay
+   without. The hint rate must not change.
+2. **Every clause explains a phrase that is in the question.** In "X refers to Y", X is a phrase
+   taken from the question (its words, allowing only inflection); Y is the stored field, value
+   format or condition it maps to, in the benchmark's style, e.g. "joined on 2014-07-31 refers
+   to the calendar day of CreationDate". Prefer explaining what a reader of the question could
+   not guess: which field a loose phrase means, a date or value format, an inclusive bound, what
+   "distinct" applies to.
+3. **Nothing about fields the question does not ask about or filter on.** No clause for a field
+   only the stored query uses internally.
+4. **No answer and no query.** A hint never states the result, a row of it, Cypher text, node
+   labels or relationship names; it speaks in the source dataset's field names as before (B5).
+5. **True.** Each clause must be correct for the stored query; check it against the query.
+6. One to three clauses, semicolon-separated, same surface form as now.
+Do not look at or use the 186 evaluation questions or their hints for any of this.
+
+**Report** in `out/v4/hints_v5_report.json`: the number of hints; the share of hints with some
+clause whose X shares no content word with its question (target: under 5%); clause counts; and
+the ids of any hint you could not write under rule 2 and why.
