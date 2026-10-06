@@ -1493,3 +1493,12 @@ through answer form; lenient accuracy does not rise in any of three runs.
 **Not run:** whether run 3 itself relies on hints more than run 2 (a hint-free pass of run 3).
 The balance, $5.66, covers it (about $3 billed) but the owner asked for no further experiments
 after today's, so it is left as the obvious next measurement.
+
+**Close of experiments (2026-10-06 evening).** Nothing is running; no further run is planned.
+Run 3 reproduced by the Fireworks agent from the result folders (same point estimates). Her two
+observations, recorded as counts only: turn-cap hits on the 186 are 125 untrained, 102 run 1,
+108 run 2, 134 run 3; and run 3's four passes are 0.4462, 0.4355, 0.4462, 0.5000 strict, the
+last an outlier upward. Adapters for run 3's step 37 are in object storage with the others.
+The final draft of the write-up exists outside this repository at the owner's instruction (not
+to be shared until he says); the version in `blog/` here is the first draft of 2026-10-03 and
+predates E10.
