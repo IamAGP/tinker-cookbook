@@ -1347,3 +1347,25 @@ pass, new hint or run exists (2026-10-06 16:50).**
 7. Tokens per hint and clauses per hint are reported before and after the rewrite.
 8. Training does not start unless the balance read after E10a covers the training estimate plus
    the four passes on the 186 at list prices.
+
+**E10 data, frozen before any billed step (2026-10-06 ~17:00).** `train_320_hints_v5.jsonl`,
+sha256 `2de3aee7800e07cd…`: run 2's training file with only the hint field replaced — same 320
+rows in the same order, every other field identical (asserted), the same 291 rows carry a hint.
+- *Property changed:* hints with a clause whose explained phrase shares no word with the
+  question, 239 of 291 (82.1%) → 0 of 291; all 694 explained phrases occur verbatim in their
+  question. Confirmed by the Fireworks agent with her original script (0 of 291, 0 of 694).
+- *Size:* clauses per hint 2.97 → 2.38 (865 → 694); words per hint 28.7 → 27.8.
+- *Truth:* she read 20 by seeded sample and found no false statement. All 80 date clauses use
+  the field spelling of the entity the stored query filters or returns (checked over all of
+  them: 76 by rule, 4 by reading). No hint contains an answer value absent from the question,
+  query syntax or relationship names.
+**Limits of the manipulation, stated before the run (from her review).**
+1. *Templated.* The 694 clauses have 36 distinct right-hand sides once numbers and quoted
+   strings are masked, and eight of them cover 434 clauses. These hints fix one measured
+   property; they are not a stand-in for human hints.
+2. *Two things change, not one.* The rewrite also removed information: the old hints, mismatch
+   and all, told the model about fields the question never names, and some new hints are true
+   but nearly empty ("ID 40879 refers to the source Id used to select the named entity"). So run
+   3 differs from run 2 in where the explained terms come from **and** in how much a hint tells.
+   If run 3 scores lower, emptier hints explain it as well as anything; if it scores higher,
+   the gain is despite less information per hint. The confirmatory test is read with this beside it.

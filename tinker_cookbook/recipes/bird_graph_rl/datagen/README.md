@@ -3069,3 +3069,19 @@ Questions were individually composed in the numbered v4 batch modules and polish
     }
   }
 ]
+
+
+### Amendment E preparation — 2026-10-06T11:14:29.966921+00:00
+
+Read Amendment E and inspected the stored first-batch questions, queries and rows. Verified candidate coverage for 291 originally hinted instances; 29 instances remain without hints. Literal phrase and query-evidence audits passed for 320 candidate records. The override uses a null hint for originally unhinted instances, so it has one record per selected instance in original instance order. Source fields retain the benchmark spelling, including Posts.CreaionDate. No graph connection or evaluation-question read. Next: save the candidates in checkpointed batches, inspect the resulting file and finish the report.
+
+
+### Amendment E complete — 2026-10-06T11:17:37.290487+00:00
+
+Saved and re-read `hints_v5.jsonl`: 320 records, 291 nonempty hints and 29 nulls. The original hint assignment and rate (90.937500%) are preserved. Hints with a clause sharing no content word with its question: 0 (0.000000%). Clause distribution: 1 clause(s): 42, 2 clause(s): 95, 3 clause(s): 154; 694 clauses total. Unable to satisfy rule 2: 0.
+
+Audited literal question spans and stored-query evidence for every clause. Separately checked every emitted source field against stored-query properties, clause counts, Id order/uniqueness, hint assignment, and the absence of node labels or Cypher in explanation text. Inspected 18 saved examples spanning calendar days, inclusive/exact bounds, preview deduplication, dates/times, comparison, distinct grouped counts, and deep shapes against their stored queries. Stored-row checks cover distinct returned values, percentage ranges, preview lengths and timestamp formats where applicable. Frozen SHA-256 checks passed for 76 existing generated artifacts, including both batches, their questions, gold answers and the held-out artifacts. No graph execution or evaluation-question read.
+
+`hints_v5_report.json` contains the counts, clause evidence, sample ids, original artifact hashes and audit results. Empty hints are represented as JSON null, rather than dropping unhinted ids. Reproduce/resume with `PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m tinker_cookbook.recipes.bird_graph_rl.datagen.hints_v5`. The initial direct-file invocation failed because the existing local `inspect.py` shadows Python's standard-library module; the module invocation succeeded.
+
+This task is complete; no records remain to write.
