@@ -1369,3 +1369,27 @@ rows in the same order, every other field identical (asserted), the same 291 row
    3 differs from run 2 in where the explained terms come from **and** in how much a hint tells.
    If run 3 scores lower, emptier hints explain it as well as anything; if it scores higher,
    the gain is despite less information per hint. The confirmatory test is read with this beside it.
+
+### E10 preflight (written before launch, 2026-10-06)
+
+**Opening balance: $45.34**, read from the Tinker console at about 17:10, auto-reload off. (The
+last reading, on 2026-10-03, was $45.78; nothing of this project ran in between, so the $0.44 is
+unexplained here — possibly storage of saved checkpoints; not investigated.)
+**The Fireworks agent's control has finished and the graph is free** (her rows W21–W23).
+**What runs, in two stages with a balance reading between them.**
+*Stage A (E10a):* eight passes of the 186 with hints withheld (`eval_no_hints.py`): four on the
+untrained model, then four on run 2's step 37. Bounded by question count and a $3 cap per pass;
+run 2's equivalents with hints cost $0.89–$1.01 each at list prices.
+*Stage B (E10b):* training through `train_logged.py` (37 steps × 8 × 8, `train.py` unchanged,
+the training call's metrics written to `forward_backward.jsonl`), then step 37 on the 186 at
+four samples, then the 360. The four passes on the 186 run before the 360, so the confirmatory
+comparison completes first if the balance runs short.
+**Rule-7 answers** are those of the run 2 preflight (same code path): a line per iteration and
+per question; metrics, summaries and checkpoints written as they happen and mirrored every two
+minutes; memory bounded per iteration; a kill leaves the last checkpoint and all finished
+questions, and the pipeline resumes. New in this run: a loss value per training call.
+**Cost bound.** Stage A about $7.56 at list; stage B $35.80 training + $7.10 evaluations; total
+$50.46 at list, about $37.90 at run 2's measured ratio (0.751). At full list price the balance
+would be exhausted during the last evaluation; with auto-reload off nothing can be charged
+beyond the balance. **Gate:** stage B starts only if the balance after stage A is at least
+$39.58 (training plus the four passes on the 186, at list).
