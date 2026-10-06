@@ -1317,3 +1317,33 @@ and step 30.
 only, but hint text also changes prompt length slightly. A loss value is captured this time.
 **Cost bound.** List-price estimates from run 2: training $35.80, evaluations $7.10, diagnostic
 $7.56; total $50.46, about $37.90 at the billing ratio measured on run 2 (0.751).
+
+**E10 pre-registration, additions after review by the Fireworks agent — before any hint-free
+pass, new hint or run exists (2026-10-06 16:50).**
+*E10a.*
+1. **Statistic, fixed now:** per question, benefit = mean lenient over four samples with hints
+   minus mean lenient over four samples without; the test is a paired bootstrap over questions
+   of (benefit of run 2 − benefit of the untrained model). Reported also restricted to questions
+   that neither model answers leniently 4 of 4 with hints, because a model nearer the ceiling
+   has less room to show a benefit.
+2. **Lenient is primary** because the question is whether the model finds the right values with
+   and without the hint; the shape of the answer is not at issue. Strict is reported beside it.
+3. **Placebo:** questions among the 186 that carry no hint are unchanged by the manipulation;
+   their "benefit" is reported separately as the noise level (count to be read from the
+   reference file at analysis time; the declared hint rate is 172 of 186).
+4. **How a failure will be read:** run 2 saw a hint on 291 of 320 training questions, so a
+   hint-free prompt is unusual for it; that should make it lose *more* without hints. The
+   prediction therefore holds against a headwind if it holds. If it fails, "run 2 still uses
+   hints" and "run 2 is thrown by the missing section" cannot be told apart, and the result is
+   reported as not supporting the hypothesis, with both readings named.
+5. **What E10a cannot say:** run 1 was trained on hints with the same mismatch, so a reduced
+   benefit shows at most that RL on these hints changes reliance on hints — not that hint text
+   is the cause. Only E10b speaks to the text.
+*E10b.*
+6. **One seed against one seed.** An interval above zero for run 3 minus run 2 covers question
+   and sampling noise only; what a change of seed alone does has not been measured here. The
+   result will be worded as "run 3 scored higher than run 2", not as "better hints help",
+   unless a seed repeat exists.
+7. Tokens per hint and clauses per hint are reported before and after the rewrite.
+8. Training does not start unless the balance read after E10a covers the training estimate plus
+   the four passes on the 186 at list prices.
