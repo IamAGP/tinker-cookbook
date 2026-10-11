@@ -83,9 +83,21 @@ It helps to see what that looks like. Here is a four-hop question from the unsee
 > What mean score do the distinct posts commented on by authors of posts linked to from posts
 > titled 'Local median and local average' have?
 
-The untrained model spends all eight turns on it. It follows the link relationship in the wrong
-direction, writes three queries that do not parse, and runs out of turns without an answer. The
-trained model writes one query, gets 4.0, and stops. We picked this example by a rule, not by
+In our evaluation the untrained model spent all eight turns on it: it followed the link
+relationship in the wrong direction, wrote three queries that do not parse, and ran out of turns
+without an answer, while both trained models wrote one query, got 4.0, and stopped. Below are four
+fresh attempts by each, recorded for this page and shown in full, every word of reasoning, every
+query and every result. The untrained model fails all four. The trained one gets three of four
+exactly right, though less tidily than in the evaluation: it takes five to eight turns.
+
+<iframe id="traj" class="wide" src="widgets/trajectories.html" title="Agent trajectories, verbatim" loading="lazy"
+  style="border:0;min-height:900px;display:block;margin:26px auto 22px"></iframe>
+<script>
+window.addEventListener("message", function (e) {
+  if (e.data && e.data.trajHeight) document.getElementById("traj").style.height = (e.data.trajHeight + 4) + "px";
+});
+</script>
+ We picked this example by a rule, not by
 taste: among the questions on unseen structures that the untrained model got wrong by any
 standard and two trained models got exactly right, of which there are forty, it is one of the
 deepest.
@@ -98,7 +110,7 @@ Strict accuracy rose from 0.421 to 0.466, 0.476 and 0.457 in three runs. Against
 first run came in at +4.6 points and missed by less than half a point, the second at +5.5 and
 cleared it, the third at +3.6 with an interval that just touches zero. The three runs trained on
 three different sets of questions, and no two of them can be told apart statistically. The fair
-summary is that RL bought four to five points on human questions, and that is between a fifth and
+summary is that RL bought three and a half to five and a half points on human questions, and that is between a fifth and
 a third of the distance to a model three times the size.
 
 ## What did not go up
@@ -122,7 +134,9 @@ The reference answer is the single number 1. The untrained model found that numb
 tries, and on three of them returned it with extras: the post's id beside it twice, and once
 the id, the title and the score as well. After training, all four tries in both of the first
 two runs returned the count and nothing else. (The rule for choosing it: among questions the
-model always got leniently right before and after, the one with the largest strict gain.)
+model always got leniently right before and after, the one with the largest strict gain.) The second tab of the viewer above shows four
+fresh attempts at this question: the untrained model is exactly right in two of them, the trained
+one in all four.
 
 That is a genuine improvement, and for anyone whose downstream code expects a particular shape
 it is the improvement that matters. But on generated questions the model had also learned to
@@ -139,8 +153,8 @@ averages, minima and maxima are about 12%. In our training set they were nearly 
 
 It was a tidy story, and tidy stories are dangerous, so before building anything we wrote the
 prediction into the experiment journal: a training set whose mix follows the human one will
-raise lenient accuracy on human questions above the first run. We built that set, had a second
-agent verify independently that none of it leaked into any held-out set, and trained again.
+raise lenient accuracy on human questions above the first run. We built that set, checked it with a
+script separate from the generator for leaks into every held-out set, and trained again.
 
 The prediction failed. Lenient accuracy in the second run was 2.4 points *below* the first,
 with an interval that just includes zero. Matching the kinds of questions people ask did not
@@ -151,11 +165,11 @@ make the model better at answering people.
 While that run was training, the agent checking our data noticed something else. In the
 benchmark, a hint explains a phrase from the question. One of the 186 asks, "Among the posts
 owned by an elder user, how many of them have a score of over 19?", and its hint reads "elder
-users refers to Age > 65; Score of over 19 refers to Score >= 20". Our generated hints were
+users refers to Age > 65; Score of over 19 refers to Score > = 20". Our generated hints were
 different. Here is one:
 
 > **Question:** What are the titles (or the first 120 body characters for untitled posts) of
-> the posts authored by users with reputation exactly 180?
+> the posts authored by users with reputation exactly 180?  
 > **Hint:** score refers to Score; post text refers to Title when present, otherwise the first
 > 120 characters of Body; each qualifying entity is counted once.
 
@@ -178,7 +192,8 @@ from the raw outputs with its own code and got the same numbers.
 
 The left panel is the clearest picture in this post. Without hints, the trained model is the
 better of the two: it has learned to answer from the question alone. With hints, it is no
-better than where it started. Everything it gained in skill it gave back in attention.
+better than where it started. On lenient accuracy, what it gained in skill it gave back in
+attention.
 
 Two cautions belong here. The effect is clear on lenient accuracy and not on strict, where the
 trained model keeps most of the benefit and the difference is not distinguishable from zero.
@@ -200,8 +215,7 @@ So we are left with a finding and without its cause. Training on our data roughl
 hint is worth to this model; that much is measured twice. Making the training hints agree with
 their questions in form does not undo it, at least not in one run. We know one reason our
 repair may have been too weak, because the agent that reviewed it said so before the run: in
-fixing the mismatch, the rewrite also made the hints emptier and more formulaic. Thirty-six
-distinct templates cover all 694 clauses. Human hints are not like that. A model has little to
+fixing the mismatch, the rewrite also made the hints emptier and more formulaic. Once numbers and names are masked, thirty-six phrasings cover all 694 clauses. Human hints are not like that. A model has little to
 gain from reading a hint that tells it almost nothing, whether or not its words come from the
 question.
 
@@ -211,8 +225,7 @@ Reward from execution works, and it is cheap. No judge, no demonstrations, an ho
 tens of dollars, and a small model gets measurably better at using a tool against a real
 database, including on query shapes it has not seen.
 
-Score your results in more than one way. With strict accuracy alone we would have a clean
-five-point win and a wrong idea of what the model learned.
+Score your results in more than one way. With strict accuracy alone we would have a clean win of about five points and a wrong idea of what the model learned.
 
 Test what your model attends to, not only what it scores. Removing one part of the prompt and
 measuring the drop cost us less than five dollars and told us more than a training run did.
@@ -230,7 +243,8 @@ evaluation, one independently recomputed every headline number from the raw outp
 code, and one generated data against a written specification. They shared a single append-only
 ledger of facts. Several statements in this post differ from their first drafts because the
 checking agent would not accept them, and the hint problem was that agent's discovery. The same
-recipe applied to a larger model on a different platform is written up separately.
+recipe applied to a larger model on a different platform is written up separately:
+[RL post-training a graph-query agent on Fireworks](../bird-graph-rl-fireworks/).
 
 ![Training curves for the three runs](figures/fig5_training_curves.png)
 
@@ -282,4 +296,5 @@ resamples). Ledger rows refer to `SHARED_LEDGER.md` in the repository.
 - The rewritten hints fix one measured property and are less informative than the originals, so
   the third run is not a test of training on hints as good as human ones.
 - Whether the third run's model itself relies on hints more than the second's was not measured.
-- The 27B reference figure is a single pass.
+- The 27B reference figure is a single pass on Tinker; a four-sample figure for the same model on
+  Fireworks is 0.586. The "fifth to a third" holds against either.
