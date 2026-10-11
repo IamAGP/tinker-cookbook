@@ -1502,3 +1502,12 @@ last an outlier upward. Adapters for run 3's step 37 are in object storage with 
 The final draft of the write-up exists outside this repository at the owner's instruction (not
 to be shared until he says); the version in `blog/` here is the first draft of 2026-10-03 and
 predates E10.
+
+**Transcripts for the write-up (2026-10-11).** `eval_transcripts.py` re-ran two example questions
+with full, verbatim message histories (reasoning, tool calls, tool results), four attempts each
+for the untrained model and run 2, same agent and limits as the evaluations: the four-hop
+held-out question (untrained 0 of 4 exactly right, all at the turn cap; run 2 3 of 4, in 5, 7
+and 8 turns) and human question 562 (untrained 2 of 4, run 2 4 of 4). These are fresh samples
+and differ from the stored evaluation passes (there, both trained runs solved the four-hop
+question in one query); the article says so. Billed: 16 rollouts, under a dollar. Output
+`blog_transcripts.json`, mirrored to object storage.
