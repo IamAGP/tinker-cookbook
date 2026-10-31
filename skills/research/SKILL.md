@@ -537,7 +537,7 @@ paths = await checkpoint_utils.save_checkpoint_async(
 
 # Resume
 record = checkpoint_utils.get_last_checkpoint(log_path, required_key="state_path")
-tc.load_state_with_optimizer(path=record.state_path)
+tc = svc.create_training_client_from_state_with_optimizer(path=record.state_path)
 ```
 
 ### Weight export
@@ -545,7 +545,7 @@ tc.load_state_with_optimizer(path=record.state_path)
 ```python
 from tinker_cookbook import weights
 
-adapter_dir = weights.download(tinker_path="tinker://run-id/sampler_weights/final", output_dir="./adapter")
+adapter_dir = weights.download(tinker_path="tinker://run-id/external_weights/final", output_dir="./adapter")
 weights.build_hf_model(base_model="Qwen/Qwen3-8B", adapter_path=adapter_dir,
                        output_path="./model", dtype="bfloat16")
 weights.publish_to_hf_hub(model_path="./model", repo_id="user/my-model", private=True)

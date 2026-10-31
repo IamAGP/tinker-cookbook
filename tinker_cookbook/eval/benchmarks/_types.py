@@ -147,6 +147,16 @@ _MODEL_EVAL_DEFAULTS: dict[str, dict[str, int | float]] = {
         "context_window": 262144,
         "timeout_seconds": 1800,
     },
+    "nvidia/NVIDIA-Nemotron-3.5-Super-VL-120B-A12B-BF16": {
+        "max_tokens": 65536,
+        "context_window": 65536,
+        "timeout_seconds": 1800,
+    },
+    "nvidia/NVIDIA-Nemotron-3.5-Super-VL-120B-A12B-BF16:peft:262144": {
+        "max_tokens": 262144,
+        "context_window": 262144,
+        "timeout_seconds": 1800,
+    },
     "nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B-BF16": {
         "max_tokens": 65536,
         "context_window": 65536,
@@ -188,6 +198,12 @@ _MODEL_EVAL_DEFAULTS: dict[str, dict[str, int | float]] = {
     },
     # DeepSeek V4.1 Flash — Hybrid (thinking), 256K context
     "deepseek-ai/DeepSeek-V4.1-Flash:peft:262144": {
+        "max_tokens": 262144,
+        "context_window": 262144,
+        "timeout_seconds": 1800,
+    },
+    # DeepSeek V4.1 Flash 1017 (256K) — Hybrid (thinking), 256K context
+    "deepseek-ai/DeepSeek-V4.1-Flash-1017:peft:262144": {
         "max_tokens": 262144,
         "context_window": 262144,
         "timeout_seconds": 1800,

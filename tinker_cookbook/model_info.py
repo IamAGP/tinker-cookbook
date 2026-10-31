@@ -163,6 +163,7 @@ def get_deepseek_info() -> dict[str, ModelAttributes]:
         "DeepSeek-V3.1-Base": ModelAttributes(org, "3", "671B-A37B", False, _ROLE_COLON),
         # Image support is coming soon.
         "DeepSeek-V4.1-Flash": ModelAttributes(org, "4.1", "552B-A16B", True, _DEEPSEEKV4_1),
+        "DeepSeek-V4.1-Flash-1017": ModelAttributes(org, "4.1", "552B-A16B", True, _DEEPSEEKV4_1),
     }
 
 
@@ -234,6 +235,9 @@ def get_nvidia_info() -> dict[str, ModelAttributes]:
         ),
         "NVIDIA-Nemotron-3.5-Lightning-30B-A3B-BF16": ModelAttributes(
             org, "3.5", "30B-A3B", True, _NEMOTRON3_LIGHTNING
+        ),
+        "NVIDIA-Nemotron-3.5-Super-VL-120B-A12B-BF16": ModelAttributes(
+            org, "3.5", "120B-A12B", True, _NEMOTRON3_ULTRA, is_vl=True
         ),
     }
 
